@@ -18,10 +18,10 @@ import javafx.scene.text.Text;
  * 
  * @author lesaun
  */
-public class SelectAddressPane extends GridPane {
+public class PaneSelectAddress extends GridPane {
     private final Button selBtn;
     private final Button canBtn;
-    private TableView<Address> tableView = new TableView<>();
+    private TableView<ORMAddress> tableView = new TableView<>();
     
 
     /**
@@ -29,7 +29,7 @@ public class SelectAddressPane extends GridPane {
      * 
      * @param customers
      */
-    SelectAddressPane(SQLAPI api) {
+    PaneSelectAddress(SQLAPI api) {
        
         // Constuct delete button
         this.canBtn = new Button();
@@ -73,19 +73,19 @@ public class SelectAddressPane extends GridPane {
 
         TableColumn address1Col = new TableColumn("Address 1");
         address1Col.setCellValueFactory(
-                new PropertyValueFactory<Address, String>("address"));
+                new PropertyValueFactory<ORMAddress, String>("address"));
 
         TableColumn address2Col = new TableColumn("Address 2");
         address2Col.setCellValueFactory(
-                new PropertyValueFactory<Address, String>("address2"));
+                new PropertyValueFactory<ORMAddress, String>("address2"));
 
-        TableColumn<Address, String> cityNameCol = new TableColumn("City");
+        TableColumn<ORMAddress, String> cityNameCol = new TableColumn("City");
         cityNameCol.setCellValueFactory(data -> {
             return new SimpleStringProperty(api.getCityById(data.getValue()
                     .getCityId()).getCity());
         });
 
-        TableColumn<Address, String> countryNameCol = new TableColumn("Country");
+        TableColumn<ORMAddress, String> countryNameCol = new TableColumn("Country");
         countryNameCol.setCellValueFactory(data -> {
             return new SimpleStringProperty(
                     api.getCountryById(api.getCityById(data.getValue()
@@ -94,11 +94,11 @@ public class SelectAddressPane extends GridPane {
 
         TableColumn postalCol = new TableColumn("Postal");
         postalCol.setCellValueFactory(
-                new PropertyValueFactory<Address, String>("postalCode"));
+                new PropertyValueFactory<ORMAddress, String>("postalCode"));
 
         TableColumn phoneCol = new TableColumn("Phone");
         phoneCol.setCellValueFactory(
-                new PropertyValueFactory<Address, String>("phone"));
+                new PropertyValueFactory<ORMAddress, String>("phone"));
 
         tableView.setItems(api.getAddresses());
         tableView.getColumns().addAll(address1Col, address2Col, cityNameCol,
@@ -124,7 +124,7 @@ public class SelectAddressPane extends GridPane {
         this.selBtn.setOnAction(handler);
     }
     
-    public Address getSelectedAddress() {
+    public ORMAddress getSelectedAddress() {
         return tableView.getSelectionModel().getSelectedItem();
     }
 }

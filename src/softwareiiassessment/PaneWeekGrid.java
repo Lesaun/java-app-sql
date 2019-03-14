@@ -22,18 +22,18 @@ import static java.util.Calendar.SATURDAY;
  * 
  * @author lesaun
  */
-public class WeekGrid extends GridPane {
+public class PaneWeekGrid extends GridPane {
 
     /**
      * Constructs the pane with given title and TableView
      * 
      * @param customers
      */
-    WeekGrid(int weekOfYear, TimeZone timeZone, SQLAPI api,
+    PaneWeekGrid(int weekOfYear, TimeZone timeZone, SQLAPI api,
              EventHandler<ActionEvent> editApptHandler,
              EventHandler<ActionEvent> addApptHandler) {
         
-        HashMap<Integer, ArrayList<Appointment>> appointmentsByDayOfWeek;
+        HashMap<Integer, ArrayList<ORMAppointment>> appointmentsByDayOfWeek;
         appointmentsByDayOfWeek = api.getAppontmentsByDayOfWeek(weekOfYear,
                                                                 timeZone);
  
@@ -49,19 +49,19 @@ public class WeekGrid extends GridPane {
         this.getRowConstraints().add(new RowConstraints(162));
 
         // Add items to grid
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(SUNDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(SUNDAY),
                  editApptHandler, addApptHandler), 0, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(MONDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(MONDAY),
                  editApptHandler, addApptHandler), 1, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(TUESDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(TUESDAY),
                  editApptHandler, addApptHandler), 2, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(WEDNESDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(WEDNESDAY),
                  editApptHandler, addApptHandler), 3, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(THURSDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(THURSDAY),
                  editApptHandler, addApptHandler), 4, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(FRIDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(FRIDAY),
                  editApptHandler, addApptHandler), 5, 0);
-        this.add(new DayGrid(appointmentsByDayOfWeek.get(SATURDAY),
+        this.add(new PaneDayGrid(appointmentsByDayOfWeek.get(SATURDAY),
                  editApptHandler, addApptHandler), 6, 0);
         
         this.setGridLinesVisible(true);

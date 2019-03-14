@@ -1,20 +1,23 @@
 package softwareiiassessment;
 
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
+import javafx.util.StringConverter;
 
 /**
  * A Pane for modifying or adding parts to the inventory
  *
  * @author lesaun
  */
-public class AddressCreateModifyPane extends GridPane {
+public class PaneAddressCreateModify extends GridPane {
     
     private final TextField idTextField = new TextField();
 
@@ -23,26 +26,17 @@ public class AddressCreateModifyPane extends GridPane {
     private final TextField postalCode = new TextField();
     private final TextField phone = new TextField();
     
-    private final Button cityAdd = new Button("Add");
-    private final Button cityEdit = new Button("Edit");
-    private final Button citySelect = new Button("Select");
-    
-    private City selectedCity;
-    private Country selectedCountry;
-    
+    private final ComboBox<ORMCountry> countryDropDown = new ComboBox<>();
+    private final ComboBox<ORMCity> cityDropDown = new ComboBox<>();
+       
     private final Text cityCountry = new Text("");
 
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
     
     private boolean citySelected = false;
-    
-    
 
-    /**
-     * Constructs the Pane
-     */
-    public AddressCreateModifyPane() {
+    public PaneAddressCreateModify(SQLAPI api) {
 
         // Add prompt text to text fields
         idTextField.setPromptText("Auto Gen - Disabled");
@@ -53,14 +47,46 @@ public class AddressCreateModifyPane extends GridPane {
         
         // Disable id text field
         idTextField.setDisable(true);
+        
+        countryDropDown.setItems(api.getCountries());
+        countryDropDown.setConverter(new StringConverter<ORMCountry>() {
+            @Override
+            public String toString(ORMCountry country) {
+                return country.getCountry();
+            }
+
+            @Override
+            public ORMCountry fromString(String string) {
+                return countryDropDown.getItems().stream().filter(ap -> 
+                    ap.getCountry().equals(string)).findFirst().orElse(null);
+            }
+        });
+        countryDropDown.valueProperty().addListener((ov, t, ti) -> {
+            cityDropDown.getItems().clear();
+            cityDropDown.setItems(api.getCountryCities(ti.getCountryId()));
+        });
+
+        cityDropDown.setConverter(new StringConverter<ORMCity>() {
+            @Override
+            public String toString(ORMCity city) {
+                return city.getCity();
+            }
+
+            @Override
+            public ORMCity fromString(String string) {
+                return cityDropDown.getItems().stream().filter(ap -> 
+                    ap.getCity().equals(string)).findFirst().orElse(null);
+            }
+        });
+
 
         // Add width constraint for columns
         ColumnConstraints leftMarginCol = new ColumnConstraints(15);
         this.getColumnConstraints().add(leftMarginCol);
 
         for (int i = 0; i < 9; i++) {
-            ColumnConstraints column = new ColumnConstraints(50);//29);
-            this.getColumnConstraints().add(column);    
+            ColumnConstraints column = new ColumnConstraints(50);
+            this.getColumnConstraints().add(column);
         }
 
         ColumnConstraints rightMarginCol = new ColumnConstraints(15);
@@ -80,11 +106,10 @@ public class AddressCreateModifyPane extends GridPane {
         this.add(address1, 4, 3, 3, 1);
         this.add(new Text("Address 2"), 2, 4, 1, 1);
         this.add(address2, 4, 4, 3, 1);
-        this.add(new Text("City"), 2, 5, 1, 1);
-        this.add(cityAdd, 4, 5, 1, 1);
-        this.add(cityEdit, 5, 5, 1, 1);
-        this.add(citySelect, 6, 5, 2, 1);
-        this.add(cityCountry, 2, 6, 3, 1);
+        this.add(new Text("Country"), 2, 5, 1, 1);
+        this.add(countryDropDown, 4, 5, 3, 1);
+        this.add(new Text("City"), 2, 6, 3, 1);
+        this.add(cityDropDown, 4, 6, 3, 1);
         this.add(new Text("Postal"), 2, 7, 1, 1);
         this.add(postalCode, 4, 7, 3, 1);
         this.add(new Text("Phone"), 2, 8, 1, 1);
@@ -95,8 +120,12 @@ public class AddressCreateModifyPane extends GridPane {
         //this.setGridLinesVisible(true);
     }
     
-    public void setCityCountry(String cityCountry) {
-        this.cityCountry.setText(cityCountry);
+    public void setCity(ORMCity city) {
+        this.cityDropDown.setValue(city);
+    }
+    
+    public void setCountry(ORMCountry country) {
+        this.countryDropDown.setValue(country);
     }
 
     /**
@@ -116,34 +145,7 @@ public class AddressCreateModifyPane extends GridPane {
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
-
-    /**
-     * Sets the event handler for the address add button
-     * 
-     * @param handler the event handler for the save button
-     */
-    public final void setCityAddEvent(EventHandler<ActionEvent> handler) {
-        this.cityAdd.setOnAction(handler);
-    }
-    
-    /**
-     * Sets the event handler for the address edit button
-     * 
-     * @param handler the event handler for the cancel button
-     */
-    public final void setCityEditEvent(EventHandler<ActionEvent> handler) {
-        this.cityEdit.setOnAction(handler);
-    }
   
-    /**
-     * Sets the event handler for the address select button
-     * 
-     * @param handler the event handler for the cancel button
-     */
-    public final void setCitySelectEvent(EventHandler<ActionEvent> handler) {
-        this.citySelect.setOnAction(handler);
-    }
-    
     /**
      * Sets the value in the ID Text Field
      * 
@@ -225,21 +227,13 @@ public class AddressCreateModifyPane extends GridPane {
         this.phone.setText(phone);
     }
     
-    public City getSelectedCity() {
-        return selectedCity;
+    public ORMCity getSelectedCity() {
+        return cityDropDown.getSelectionModel().getSelectedItem();
     }
     
-    public Country getSelectedCountry() {
-        return selectedCountry;
+    public ORMCountry getSelectedCountry() {
+        return countryDropDown.getSelectionModel().getSelectedItem();
     }
-    
-    public void setSelectedCityCountry(City city, Country country) {
-        this.citySelected = true;
-        this.selectedCity = city;
-        this.selectedCountry = country;
-        this.setCityCountry(city.getCity() + ", " + country.getCountry());
-    }
-    
     public boolean isCitySelected() {
         return citySelected;
     }

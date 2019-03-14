@@ -18,12 +18,12 @@ import javafx.scene.text.Text;
  * 
  * @author lesaun
  */
-public class CustomerManagerPane extends GridPane {
+public class PaneCustomerManager extends GridPane {
     private final Button addBtn;
     private final Button modBtn;
     private final Button delBtn;
     private final Button canBtn;
-    private TableView<Customer> tableView;
+    private TableView<ORMCustomer> tableView;
     
 
     /**
@@ -31,7 +31,7 @@ public class CustomerManagerPane extends GridPane {
      * 
      * @param customers
      */
-    CustomerManagerPane(SQLAPI api) {
+    PaneCustomerManager(SQLAPI api) {
 
         // Construct add button
         this.addBtn = new Button();
@@ -86,22 +86,22 @@ public class CustomerManagerPane extends GridPane {
     private void constructTableView(SQLAPI api) {
         this.tableView = new TableView<>();
         
-        TableColumn<Customer, String> activeCol = new TableColumn("Active");
+        TableColumn<ORMCustomer, String> activeCol = new TableColumn("Active");
         activeCol.setCellValueFactory(data -> {
             return new SimpleStringProperty(data.getValue().getActive() ? "yes" : "no");
         });
 
         TableColumn customerNameCol = new TableColumn("Name");
         customerNameCol.setCellValueFactory(
-                new PropertyValueFactory<Address, String>("customerName"));
+                new PropertyValueFactory<ORMAddress, String>("customerName"));
 
-        TableColumn<Customer, String> phoneCol = new TableColumn("Phone");
+        TableColumn<ORMCustomer, String> phoneCol = new TableColumn("Phone");
         phoneCol.setCellValueFactory(data -> {
             return new SimpleStringProperty(api.getAddressById(data.getValue()
                     .getAddressId()).getPhone());
         });
 
-        TableColumn<Customer, String> postalCodeCol = new TableColumn("Postal Code");
+        TableColumn<ORMCustomer, String> postalCodeCol = new TableColumn("Postal Code");
         postalCodeCol.setCellValueFactory(data -> {
             return new SimpleStringProperty(api.getAddressById(data.getValue()
                     .getAddressId()).getPostalCode());
@@ -148,12 +148,12 @@ public class CustomerManagerPane extends GridPane {
         this.canBtn.setOnAction(handler);
     }
     
-    public void updateCustomers(ObservableList<Customer> customers) {
+    public void updateCustomers(ObservableList<ORMCustomer> customers) {
         tableView.getItems().clear();
         tableView.setItems(customers);
     }
 
-    public Customer getSelectedCustomer() {
+    public ORMCustomer getSelectedCustomer() {
         return tableView.getSelectionModel().getSelectedItem();
     }
 }

@@ -16,7 +16,7 @@ import javafx.scene.text.Text;
  *
  * @author lesaun
  */
-public class CustomerCreateModifyPane extends GridPane {
+public class PaneCustomerCreateModify extends GridPane {
     private final RadioButton activeRadio = new RadioButton("Active");
     private final RadioButton disabledRadio = new RadioButton("Disabled");
     private final ToggleGroup radioGroup = new ToggleGroup();
@@ -29,7 +29,7 @@ public class CustomerCreateModifyPane extends GridPane {
     private final Button addressEdit = new Button("Edit");
     private final Button addressSelect = new Button("Select");
     
-    private Address address;
+    private ORMAddress address;
     private final Text address1 = new Text("");
     private final Text address2 = new Text("");
     private final Text cityCountry = new Text("");
@@ -44,7 +44,7 @@ public class CustomerCreateModifyPane extends GridPane {
     /**
      * Constructs the Pane
      */
-    public CustomerCreateModifyPane() {
+    public PaneCustomerCreateModify() {
         // Setup toggle group
         activeRadio.setId("active");
         disabledRadio.setId("disabled");
@@ -110,7 +110,7 @@ public class CustomerCreateModifyPane extends GridPane {
         });
     }
     
-    public void setAddress(Address address, City city, Country country) {
+    public void setAddress(ORMAddress address, ORMCity city, ORMCountry country) {
         this.address = address;
         this.address1.setText(address.getAddress());
         this.address2.setText(address.getAddress2());
@@ -119,7 +119,7 @@ public class CustomerCreateModifyPane extends GridPane {
         this.phone.setText(address.getPhone());
     }
     
-    public Address getAddress() {
+    public ORMAddress getAddress() {
         return address;
     }
 

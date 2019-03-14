@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
  *
  * @author v-leharv
  */
-public class Appointment {
+public class ORMAppointment {
     private final SimpleIntegerProperty appointmentId;
     private final SimpleIntegerProperty customerId;
     private final SimpleStringProperty title;
@@ -27,7 +27,7 @@ public class Appointment {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    Appointment(int appointmentId, int customerId, String title,
+    ORMAppointment(int appointmentId, int customerId, String title,
             String description, String location, String contact,
             String start, String end, String createDate, 
             String createdBy, int lastUpdate, String lastUpdateBy) { 

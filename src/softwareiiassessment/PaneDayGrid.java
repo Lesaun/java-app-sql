@@ -15,8 +15,8 @@ import javafx.scene.layout.GridPane;
  *
  * @author lesaun
  */
-class DayGrid extends GridPane {
-    DayGrid(ArrayList<Appointment> appointments,
+class PaneDayGrid extends GridPane {
+    PaneDayGrid(ArrayList<ORMAppointment> appointments,
             EventHandler<ActionEvent> editApptHandler,
             EventHandler<ActionEvent> addApptHandler) {
         

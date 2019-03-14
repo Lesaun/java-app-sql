@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
  *
  * @author v-leharv
  */
-public class Country {
+public class ORMCountry {
     private final SimpleIntegerProperty countryId;
     private final SimpleStringProperty country;
     private final SimpleStringProperty createDate;
@@ -20,7 +20,7 @@ public class Country {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    Country(int countryId, String country,
+    ORMCountry(int countryId, String country,
             String createDate, String createdBy, 
             int lastUpdate, String lastUpdateBy) {
         this.countryId = new SimpleIntegerProperty(countryId);

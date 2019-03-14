@@ -30,10 +30,10 @@ class SQLAPI {
     private final String PASSWORD = "53688557025";
     private boolean connected = false;
     
-    private HashMap<Integer, Country> countries;
-    private HashMap<Integer, City> cities;
-    private HashMap<Integer, Address> addresses;
-    private HashMap<Integer, Customer> customers;
+    private HashMap<Integer, ORMCountry> countries;
+    private HashMap<Integer, ORMCity> cities;
+    private HashMap<Integer, ORMAddress> addresses;
+    private HashMap<Integer, ORMCustomer> customers;
 
     SQLAPI() {   
         initConnection();
@@ -89,7 +89,7 @@ class SQLAPI {
 
         try {
             while (rs.next()) {
-                City city = new City(
+                ORMCity city = new ORMCity(
                     rs.getInt("cityId"),
                     rs.getString("city"),
                     rs.getInt("countryId"),
@@ -113,7 +113,7 @@ class SQLAPI {
 
         try {
             while (rs.next()) {
-                Country country = new Country(
+                ORMCountry country = new ORMCountry(
                     rs.getInt("countryId"),
                     rs.getString("country"),
                     rs.getString("createDate"),
@@ -135,7 +135,7 @@ class SQLAPI {
 
         try {
             while (rs.next()) {
-                Address address = new Address(
+                ORMAddress address = new ORMAddress(
                     rs.getInt("addressId"),
                     rs.getString("address"),
                     rs.getString("address2"),
@@ -161,7 +161,7 @@ class SQLAPI {
 
         try {
             while (rs.next()) {
-                Customer customer = new Customer(
+                ORMCustomer customer = new ORMCustomer(
                     rs.getInt("customerId"),
                     rs.getString("customerName"),
                     rs.getInt("addressId"),
@@ -179,93 +179,32 @@ class SQLAPI {
         }
     }
 
-    public ObservableList<City> getCities() {
-        return FXCollections.observableArrayList(cities.values());
+    public ObservableList<ORMCity> getCountryCities(int countryId) {
+        ObservableList<ORMCity> countryCities = FXCollections.observableArrayList();
+
+        for (ORMCity city : cities.values()) {
+            if (countryId == city.getCountryId()) {
+                countryCities.add(city);
+            }
+        }
+
+        return countryCities;
     }
 
-    public ObservableList<Country> getCountries() {
+    public ObservableList<ORMCountry> getCountries() {
         return FXCollections.observableArrayList(countries.values());
     }
     
-    public ObservableList<Address> getAddresses() {
+    public ObservableList<ORMAddress> getAddresses() {
         return FXCollections.observableArrayList(addresses.values());
     }
     
-    public ObservableList<Customer> getCustomers() {
+    public ObservableList<ORMCustomer> getCustomers() {
         return FXCollections.observableArrayList(customers.values());
     }
-
-    public City insertCity(String cityName, Country country, String user) {
-        int maxId = Collections.max(cities.keySet());
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate("INSERT INTO city " + 
-                "(cityId, city, countryId, createdate, createdBy, lastUpdateBy) " +
-                String.format("VALUES (%1$d, \"%2$s\", %3$d, NOW(), \"%4$s\","+ "\"%4$s\")", 
-                        maxId + 1, cityName, country.getCountryId(), user));
-        } catch (SQLException ex) {
-            System.out.println("SQL insert error: " + ex.getMessage());
-        }
-        
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM city WHERE " +
-                    "cityId=" + Integer.toString(maxId+1));
-            
-            rs.next();
-            City city = new City(
-                rs.getInt("cityId"),
-                rs.getString("city"),
-                rs.getInt("countryId"),
-
-                rs.getString("createDate"),
-                rs.getString("createdBy"),
-                (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
-                rs.getString("lastUpdateBy")
-            );
-            
-            cities.put(city.getCityId(), city);
-            return city;
-        } catch (SQLException ex) {
-            return null;
-        }
-    }
-
-    public Country insertCountry(String countryName, String user) {
-        int maxId = Collections.max(countries.keySet());
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate("insert into country " + 
-                "(countryId, country, createdate, createdBy, lastUpdateBy) " +
-                String.format("values (%d, \"%2$s\", NOW(), \"%3$s\", \"%3$s\")", 
-                        maxId + 1, countryName, user));
-        } catch (SQLException ex) {}
-        
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from country where countryId=" + Integer.toString(maxId+1));
-            
-            rs.next();
-            Country country = new Country(
-                rs.getInt("countryId"),
-                rs.getString("country"),
-                rs.getString("createDate"),
-                rs.getString("createdBy"),
-                (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
-                rs.getString("lastUpdateBy")
-            );
-            
-            countries.put(country.getCountryId(), country);
-            return country;
-        } catch (SQLException ex) {
-            return null;
-        }
-    }
     
-    public Address insertAddress(String address1, String address2,
-            String postalCode, String phone, City city, String user) {
+    public ORMAddress insertAddress(String address1, String address2,
+            String postalCode, String phone, ORMCity city, String user) {
         int maxId = Collections.max(addresses.keySet());
 
         try {
@@ -287,7 +226,7 @@ class SQLAPI {
                     " where addressId=" + Integer.toString(maxId + 1));
             
             rs.next();
-            Address address = new Address(
+            ORMAddress address = new ORMAddress(
                 rs.getInt("addressId"),
                 rs.getString("address"),
                 rs.getString("address2"),
@@ -308,8 +247,8 @@ class SQLAPI {
         }
     }
     
-    public Customer insertCustomer(String customerName, boolean active,
-            Address address, String user) {
+    public ORMCustomer insertCustomer(String customerName, boolean active,
+            ORMAddress address, String user) {
         int maxId = Collections.max(customers.keySet());
 
         try {
@@ -331,7 +270,7 @@ class SQLAPI {
                     " where customerId=" + Integer.toString(maxId + 1));
             
             rs.next();
-            Customer customer = new Customer(
+            ORMCustomer customer = new ORMCustomer(
                 rs.getInt("customerId"),
                 rs.getString("customerName"),
                 rs.getInt("addressId"),
@@ -350,37 +289,8 @@ class SQLAPI {
         }
     }
 
-    public void updateCity(String cityName, City city, Country country, String user) {
-        try {
-            Statement stmt = conn.createStatement();
-            city.setCity(cityName);
-            city.setCountryId(country.getCountryId());
-
-            stmt.executeUpdate("UPDATE city " +
-                    "SET city = \"" + cityName +
-                    "\", countryId = " + country.getCountryId() +
-                    " WHERE cityId = " + Integer.toString(city.getCityId())
-            );
-        } catch (SQLException ex) {
-            System.out.println("SQL update error: " + ex.getMessage());
-        }
-    }
-
-    public void updateCountry(String countryName, Country country, String user) {
-        try {
-            Statement stmt = conn.createStatement();
-            country.setCountry(countryName);
-            stmt.executeUpdate("UPDATE country " +
-                    "SET country = \"" + country.getCountry() +
-                    "\" WHERE countryId = " + Integer.toString(country.getCountryId())
-            );
-        } catch (SQLException ex) {
-            System.out.println("SQL update error: " + ex.getMessage());
-        }
-    }
-    
     public void updateAddress(String address1, String address2,
-            String postalCode, String phone, Address address, City city, String user) {
+            String postalCode, String phone, ORMAddress address, ORMCity city, String user) {
         try {
             Statement stmt = conn.createStatement();
             address.setAddress(address1);
@@ -403,7 +313,7 @@ class SQLAPI {
     }
 
     public void updateCustomer(String customerName, boolean active,
-            Address address, Customer customer, String user) {
+            ORMAddress address, ORMCustomer customer, String user) {
         try {
             Statement stmt = conn.createStatement();
             customer.setCustomerName(customerName);
@@ -421,19 +331,19 @@ class SQLAPI {
         }
     }
 
-    public Country getCountryById(int countryId) {
+    public ORMCountry getCountryById(int countryId) {
         return countries.get(countryId);
     }
 
-    public City getCityById(int cityId) {
+    public ORMCity getCityById(int cityId) {
         return cities.get(cityId);
     }
 
-    public Address getAddressById(int addressId) {
+    public ORMAddress getAddressById(int addressId) {
         return addresses.get(addressId);
     }
 
-    public void deleteCustomer(Customer selectedCustomer) {
+    public void deleteCustomer(ORMCustomer selectedCustomer) {
         customers.remove(selectedCustomer.getCustomerId());
         try {
             Statement stmt = conn.createStatement();
@@ -445,7 +355,7 @@ class SQLAPI {
         }
     }
 
-    HashMap<Integer, ArrayList<Appointment>> getAppontmentsByDayOfWeek(int weekOfYear, TimeZone timeZone) {
+    HashMap<Integer, ArrayList<ORMAppointment>> getAppontmentsByDayOfWeek(int weekOfYear, TimeZone timeZone) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
