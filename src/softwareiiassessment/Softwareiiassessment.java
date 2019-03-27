@@ -6,7 +6,6 @@
 package softwareiiassessment;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -18,12 +17,16 @@ public class Softwareiiassessment extends Application {
     private Stage primaryStage;
     private SQLAPI api;
 
+    private PaneCalendar calendarPane;
+    private Scene calendarScene;
     private PaneCustomerManager customerManagerPane;
     private Scene customerManagerScene;
     private PaneCustomerCreateModify currentCustomerPane;
     private Scene currentCustomerPaneScene;
     private PaneAddressCreateModify currentAddressPane;
     private Scene currentAddressPaneScene;
+    private PaneAppointmentCreateModify currentAppointmentPane;
+    private Scene currentAppointmentScene;
 
     private String user = "Lesaun";
 
@@ -31,6 +34,36 @@ public class Softwareiiassessment extends Application {
     public void start(Stage primaryStage) {
         api = new SQLAPI();
 
+        calendarPane = new PaneCalendar(api);
+        calendarScene = new Scene(calendarPane, 745, 382);
+
+        calendarPane.setAddBtnEvent(event -> {
+            currentAppointmentPane = new PaneAppointmentCreateModify(api);
+            currentAppointmentScene = new Scene(currentAppointmentPane, 480, 880);
+
+            primaryStage.hide();
+            primaryStage.setScene(currentAppointmentScene);
+            primaryStage.show();
+        });
+        
+        calendarPane.setModBtnEvent(event -> {
+            customerManagerModBtnEvent();
+        });
+        
+        calendarPane.setDelBtnEvent(event -> {
+            api.deleteCustomer(customerManagerPane.getSelectedCustomer());
+            customerManagerPane.updateCustomers(api.getCustomers());            
+        });
+
+        primaryStage.setResizable(false);
+        primaryStage.setTitle("Appointment Manager");
+        primaryStage.setScene(calendarScene);
+        primaryStage.show();        
+
+        this.primaryStage = primaryStage;
+    }
+    
+    private void calendarManageCustomersBtnEvent() {
         customerManagerPane = new PaneCustomerManager(api);
         customerManagerScene = new Scene(customerManagerPane, 580, 260);
 
@@ -47,11 +80,8 @@ public class Softwareiiassessment extends Application {
             customerManagerPane.updateCustomers(api.getCustomers());            
         });
 
-        primaryStage.setResizable(false);
-        primaryStage.setTitle("Appointment Manager");
         primaryStage.setScene(customerManagerScene);
         primaryStage.show();
-        this.primaryStage = primaryStage;
     }
 
     private void customerManagerModBtnEvent() {

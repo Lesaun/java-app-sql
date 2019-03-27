@@ -12,11 +12,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -34,11 +37,13 @@ class SQLAPI {
     private HashMap<Integer, ORMCity> cities;
     private HashMap<Integer, ORMAddress> addresses;
     private HashMap<Integer, ORMCustomer> customers;
+    private HashMap<Integer, ORMAppointment> appointmentsById;
+    private HashMap<Integer, ArrayList<ORMAppointment>> appointmentsByWeek;
 
     SQLAPI() {   
         initConnection();
         loadDBIntoMemory();
-    }
+    }   
 
     public ResultSet runSQLCommand(String commandToExecute) {
         try {
@@ -81,6 +86,7 @@ class SQLAPI {
         loadCitiesIntoMemory();
         loadAddressesIntoMemory();
         loadCustomersIntoMemory();
+        loadAppointmentsIntoMemory();
     }
 
     private void loadCitiesIntoMemory() {
@@ -173,6 +179,45 @@ class SQLAPI {
                 );
 
                 customers.put(customer.getCustomerId(), customer);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void loadAppointmentsIntoMemory() {
+        ResultSet rs = runSQLCommand("select * from appointment;");
+        appointmentsById = new HashMap<>();
+        appointmentsByWeek = new HashMap<>();
+
+        try {
+            while (rs.next()) {
+                ORMAppointment appointment = new ORMAppointment(
+                        rs.getInt("appointmentId"),
+                        rs.getInt("customerId"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("location"),
+                        rs.getString("contact"),
+                        rs.getString("url"),
+                        rs.getDate("start"),
+                        rs.getDate("end"),
+                        rs.getString("createDate"),
+                        rs.getString("createdBy"),
+                        (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
+                        rs.getString("lastUpdateBy")
+                );
+
+                appointmentsById.put(appointment.getAppointmentId(), appointment);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(appointment.getStart());
+                int week_of_year = cal.get(Calendar.WEEK_OF_YEAR);
+                
+                if (!appointmentsByWeek.containsKey(week_of_year)) {
+                    appointmentsByWeek.put(week_of_year, new ArrayList<>());
+                }
+
+                appointmentsByWeek.get(week_of_year).add(appointment);
             }
         } catch (SQLException ex) {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
@@ -355,8 +400,9 @@ class SQLAPI {
         }
     }
 
-    HashMap<Integer, ArrayList<ORMAppointment>> getAppontmentsByDayOfWeek(int weekOfYear, TimeZone timeZone) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public ObservableList<ORMAppointment> getAppointmentsByWeek(int weekOfYear,
+            TimeZone timeZone) {
+        return null;
     }
 }
 

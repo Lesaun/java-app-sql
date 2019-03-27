@@ -5,6 +5,7 @@
  */
 package softwareiiassessment;
 
+import java.sql.Date;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -19,8 +20,9 @@ public class ORMAppointment {
     private final SimpleStringProperty description;
     private final SimpleStringProperty location;
     private final SimpleStringProperty contact;
-    private final SimpleStringProperty start;
-    private final SimpleStringProperty end;
+    private final SimpleStringProperty url;
+    private Date start;
+    private Date end;
 
     private final SimpleStringProperty createDate;
     private final SimpleStringProperty createdBy;
@@ -28,8 +30,8 @@ public class ORMAppointment {
     private final SimpleStringProperty lastUpdateBy;
 
     ORMAppointment(int appointmentId, int customerId, String title,
-            String description, String location, String contact,
-            String start, String end, String createDate, 
+            String description, String location, String contact, String url,
+            Date start, Date end, String createDate, 
             String createdBy, int lastUpdate, String lastUpdateBy) { 
         this.appointmentId = new SimpleIntegerProperty(appointmentId);
         this.customerId = new SimpleIntegerProperty(customerId);
@@ -37,8 +39,9 @@ public class ORMAppointment {
         this.description = new SimpleStringProperty(description);
         this.location = new SimpleStringProperty(location);
         this.contact = new SimpleStringProperty(contact);
-        this.start = new SimpleStringProperty(start);
-        this.end = new SimpleStringProperty(end);
+        this.url = new SimpleStringProperty(url);
+        this.start = start;
+        this.end = end;
         
         this.createDate = new SimpleStringProperty(createDate);
         this.createdBy = new SimpleStringProperty(createdBy);
@@ -126,20 +129,28 @@ public class ORMAppointment {
         this.contact.set(contact);
     }
 
-    public String getStart() {
-        return start.get();
+    public String getUrl() {
+        return url.get();
     }
 
-    public void setStart(String start) {
-        this.start.set(start);
+    public void setUrl(String url) {
+        this.url.set(url);
     }
 
-    public String getEnd() {
-        return end.get();
+    public Date getStart() {
+        return start;
     }
 
-    public void setEnd(String end) {
-        this.end.set(end);
+    public void setStart(Date start) {
+        this.start = start;
+    }
+
+    public Date getEnd() {
+        return end;
+    }
+
+    public void setEnd(Date end) {
+        this.end = end;
     }
 }
         
