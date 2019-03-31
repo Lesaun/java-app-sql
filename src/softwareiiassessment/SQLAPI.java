@@ -38,7 +38,8 @@ class SQLAPI {
     private HashMap<Integer, ORMAddress> addresses;
     private HashMap<Integer, ORMCustomer> customers;
     private HashMap<Integer, ORMAppointment> appointmentsById;
-    private HashMap<Integer, ArrayList<ORMAppointment>> appointmentsByWeek;
+    private HashMap<SimpleImmutableEntry<Integer, Integer>,
+        ArrayList<ORMAppointment>> appointmentsByYearWeek;
 
     SQLAPI() {   
         initConnection();
@@ -188,7 +189,7 @@ class SQLAPI {
     private void loadAppointmentsIntoMemory() {
         ResultSet rs = runSQLCommand("select * from appointment;");
         appointmentsById = new HashMap<>();
-        appointmentsByWeek = new HashMap<>();
+        appointmentsByYearWeek = new HashMap<>();
 
         try {
             while (rs.next()) {
@@ -209,19 +210,43 @@ class SQLAPI {
                 );
 
                 appointmentsById.put(appointment.getAppointmentId(), appointment);
+
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(appointment.getStart());
                 int week_of_year = cal.get(Calendar.WEEK_OF_YEAR);
-                
-                if (!appointmentsByWeek.containsKey(week_of_year)) {
-                    appointmentsByWeek.put(week_of_year, new ArrayList<>());
+                int year = cal.get(Calendar.YEAR);
+                SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
+
+                if (!appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+                    appointmentsByYearWeek.put(yearWeekEntry, new ArrayList<>());
                 }
 
-                appointmentsByWeek.get(week_of_year).add(appointment);
+                appointmentsByYearWeek.get(yearWeekEntry).add(appointment);
             }
         } catch (SQLException ex) {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
+        SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
+        return FXCollections.observableArrayList(appointmentsByYearWeek.get(yearWeekEntry));
+    }
+
+    private ObservableList<ORMAppointment> getAppointmentsByMonth(int monthOfYear, int year) {
+        ObservableList<ORMAppointment> appointmentsInMonth = FXCollections.observableArrayList();
+
+        Calendar cal = new GregorianCalendar(year, monthOfYear, 1);
+        int minWeek = cal.get(Calendar.WEEK_OF_YEAR);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        int maxWeek = cal.get(Calendar.WEEK_OF_YEAR);
+        
+        for (int i = minWeek; i < maxWeek; i++) {
+            SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
+            appointmentsInMonth.addAll(appointmentsByYearWeek.get(yearWeekEntry))
+        }
+      
+        return appointmentsInMonth;
     }
 
     public ObservableList<ORMCity> getCountryCities(int countryId) {
@@ -398,11 +423,6 @@ class SQLAPI {
         } catch (SQLException ex) {
             System.out.println("SQL update error: " + ex.getMessage());
         }
-    }
-
-    public ObservableList<ORMAppointment> getAppointmentsByWeek(int weekOfYear,
-            TimeZone timeZone) {
-        return null;
     }
 }
 
