@@ -11,9 +11,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -213,7 +215,7 @@ class SQLAPI {
 
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(appointment.getStart());
-                int week_of_year = cal.get(Calendar.WEEK_OF_YEAR);
+                int weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
                 int year = cal.get(Calendar.YEAR);
                 SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
 
@@ -228,12 +230,16 @@ class SQLAPI {
         }
     }
 
-    private ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
+    public ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
         SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
-        return FXCollections.observableArrayList(appointmentsByYearWeek.get(yearWeekEntry));
+        
+        if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+            return FXCollections.observableArrayList(appointmentsByYearWeek.get(yearWeekEntry));
+        }
+        return FXCollections.observableArrayList();
     }
 
-    private ObservableList<ORMAppointment> getAppointmentsByMonth(int monthOfYear, int year) {
+    public ObservableList<ORMAppointment> getAppointmentsByMonth(int monthOfYear, int year) {
         ObservableList<ORMAppointment> appointmentsInMonth = FXCollections.observableArrayList();
 
         Calendar cal = new GregorianCalendar(year, monthOfYear, 1);
@@ -242,8 +248,11 @@ class SQLAPI {
         int maxWeek = cal.get(Calendar.WEEK_OF_YEAR);
         
         for (int i = minWeek; i < maxWeek; i++) {
-            SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
-            appointmentsInMonth.addAll(appointmentsByYearWeek.get(yearWeekEntry))
+            SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, i);
+            
+            if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+                appointmentsInMonth.addAll(appointmentsByYearWeek.get(yearWeekEntry));
+            }
         }
       
         return appointmentsInMonth;

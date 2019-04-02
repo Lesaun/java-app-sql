@@ -1,5 +1,7 @@
 package softwareiiassessment;
 
+import java.util.Calendar;
+import java.util.Date;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,7 +38,7 @@ public class PaneCalendar extends GridPane {
     private final Button modBtn;
     private final Button delBtn;
     private final Button logBtn;
-    private TableView<ORMCustomer> tableView;
+    private TableView<ORMAppointment> tableView;
     
 
     /**
@@ -44,7 +46,7 @@ public class PaneCalendar extends GridPane {
      * 
      * @param customers
      */
-    PaneCalendar(SQLAPI api) {
+    PaneCalendar(SQLAPI api, Date startDate) {
         // Setup toggle group
         weekRadio.setId("week");
         monthRadio.setId("month");
@@ -103,9 +105,56 @@ public class PaneCalendar extends GridPane {
             RowConstraints row = new RowConstraints(row_height);
             this.getRowConstraints().add(row);
         }
-        
-        constructTableView(api);
 
+        constructTableView(api);
+        
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(startDate);
+        int startWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
+        int startYear = currentDate.get(Calendar.YEAR);
+        setTableViewToWeekOfYear(api, startWeek, startYear);
+        
+        calPrev.setOnAction(e -> {
+            if (weekRadio.isSelected()) {
+                currentDate.add(Calendar.DATE, -7);
+                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+            } else {
+                currentDate.add(Calendar.MONTH, -1);
+                int tstartWeek = currentDate.get(Calendar.MONTH);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+            }
+        });
+        
+        calNext.setOnAction(e -> {
+            if (weekRadio.isSelected()) {
+                currentDate.add(Calendar.DATE, 7);
+                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+            } else {
+                currentDate.add(Calendar.MONTH, 1);
+                int tstartWeek = currentDate.get(Calendar.MONTH);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+            }
+        });
+        
+        radioGroup.selectedToggleProperty().addListener((ov, ot, new_toggle) -> {
+            RadioButton selectedBtn = (RadioButton) new_toggle;
+            if (selectedBtn.getId().equals("week")) {
+                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+            } else {
+                int tstartWeek = currentDate.get(Calendar.MONTH);
+                int tstartYear = currentDate.get(Calendar.YEAR);
+                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+            }
+        });
+        
         // Add items to grid
         this.add(new Text("Calendar"), 1, 1, 3, 1);
         this.add(this.weekRadio, 1, 3, 2, 1);
@@ -122,33 +171,38 @@ public class PaneCalendar extends GridPane {
     
     private void constructTableView(SQLAPI api) {
         this.tableView = new TableView<>();
+
+        TableColumn titleCol = new TableColumn("Title");
+        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         
-        TableColumn<ORMCustomer, String> activeCol = new TableColumn("Active");
-        activeCol.setCellValueFactory(data -> {
-            return new SimpleStringProperty(data.getValue().getActive() ? "yes" : "no");
-        });
+        TableColumn contactCol = new TableColumn("Contact");
+        contactCol.setCellValueFactory(new PropertyValueFactory<>("contact"));
 
-        TableColumn customerNameCol = new TableColumn("Name");
-        customerNameCol.setCellValueFactory(
-                new PropertyValueFactory<ORMAddress, String>("customerName"));
+        TableColumn locationCol = new TableColumn("Location");
+        locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
 
-        TableColumn<ORMCustomer, String> phoneCol = new TableColumn("Phone");
-        phoneCol.setCellValueFactory(data -> {
-            return new SimpleStringProperty(api.getAddressById(data.getValue()
-                    .getAddressId()).getPhone());
-        });
+        TableColumn<ORMAppointment, String> startCol = new TableColumn("Start Time");
+        startCol.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getStart().toString()));
 
-        TableColumn<ORMCustomer, String> postalCodeCol = new TableColumn("Postal Code");
-        postalCodeCol.setCellValueFactory(data -> {
-            return new SimpleStringProperty(api.getAddressById(data.getValue()
-                    .getAddressId()).getPostalCode());
-        });
-        
-        tableView.setItems(api.getCustomers());
-        tableView.getColumns().addAll(activeCol, customerNameCol, phoneCol, postalCodeCol);
+        tableView.getColumns().addAll(titleCol, contactCol, locationCol, startCol);
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
+    
+    private void setTableItems(ObservableList<ORMAppointment> items) {
+        this.tableView.getItems().clear();
+        this.tableView.setItems(items);
+        this.tableView.refresh();
+    }
 
+    private void setTableViewToWeekOfYear(SQLAPI api, int week, int year) {
+        setTableItems(api.getAppointmentsInWeek(week, year));
+    }
+    
+    private void setTableViewToMonthOfYear(SQLAPI api, int month, int year) {
+        setTableItems(api.getAppointmentsByMonth(month, year));
+    }
+    
     /**
      * Set handler for add button event
      * 
@@ -185,12 +239,7 @@ public class PaneCalendar extends GridPane {
         this.logBtn.setOnAction(handler);
     }
     
-    public void updateCustomers(ObservableList<ORMCustomer> customers) {
-        tableView.getItems().clear();
-        tableView.setItems(customers);
-    }
-
-    public ORMCustomer getSelectedCustomer() {
-        return tableView.getSelectionModel().getSelectedItem();
+    public final void setCustomerManagerBtnEvent(EventHandler<ActionEvent> handler) {
+        this.manageCustomersBtn.setOnAction(handler);
     }
 }

@@ -54,26 +54,33 @@ public class PaneAppointmentCreateModify extends GridPane {
         title.setPromptText("Title");
         url.setPromptText("URL");
 
+        String[] hours = new String[]{"08am", "09am", "10am", "11am", "12pm",
+                                      "01pm", "02pm", "03pm", "04pm", "05pm"};
+
         // Disable id text field
         idTextField.setDisable(true);
         
-        startHour.setItems(FXCollections.observableArrayList(
-                new String[]{"08", "09", "10", "11", "12",
-                             "01", "02", "03", "04", "05"}));
-        
+        startHour.setItems(FXCollections.observableArrayList(hours));
         startMinute.setItems(FXCollections.observableArrayList(
                 Arrays.stream(IntStream.rangeClosed(0, 59).toArray())
                     .mapToObj(n -> String.format("%02d", n))
                         .collect(Collectors.toList())));
         
-        endHour.setItems(FXCollections.observableArrayList(
-                new String[]{"08", "09", "10", "11", "12",
-                             "01", "02", "03", "04", "05"}));
+        startHour.valueProperty().addListener((ov, t, ti) -> 
+            setEndLowTime(ti, 
+                startMinute.getSelectionModel().getSelectedItem(),
+                null));
+        startMinute.valueProperty().addListener((ov, t, ti) ->
+            setEndLowTime(startHour.getSelectionModel().getSelectedItem(), 
+                ti,
+                null));
+        endHour.valueProperty().addListener((ov, t, ti) -> {
+            if (ti != null)
+                setEndLowTime(startHour.getSelectionModel().getSelectedItem(), 
+                    startMinute.getSelectionModel().getSelectedItem(),
+                    ti);
+        });
 
-        endMinute.setItems(FXCollections.observableArrayList(
-                Arrays.stream(IntStream.rangeClosed(0, 59).toArray())
-                    .mapToObj(n -> String.format("%02d", n))
-                        .collect(Collectors.toList())));
 
         // Add width constraint for columns
         ColumnConstraints leftMarginCol = new ColumnConstraints(15);
@@ -98,8 +105,6 @@ public class PaneAppointmentCreateModify extends GridPane {
 
         RowConstraints bottomMargin = new RowConstraints(15);
         this.getRowConstraints().add(bottomMargin);
-       
-        // Add height constraint for rows
 
         // Add controls/fields onto grid pane
         this.add(new Text("Appointment"), 1, 1, 2, 1);
@@ -116,14 +121,58 @@ public class PaneAppointmentCreateModify extends GridPane {
         this.add(new Text("Start Date"), 2, 13, 1, 1);
         this.add(startDate, 4, 13, 3, 1);
         this.add(new Text("Start Time"), 2, 14, 1, 1);
-        //this.add(start, 4, 14, 3, 1);
+        this.add(startHour, 4, 14, 2, 1);
+        this.add(startMinute, 6, 14, 2, 1);
         this.add(new Text("End Time"), 2, 15, 1, 1);
-        //this.add(url, 4, 16, 3, 1);
+        this.add(endHour, 4, 15, 2, 1);
+        this.add(endMinute, 6, 15, 2, 1);
         this.add(new Text("URL"), 2, 16, 1, 1);
         this.add(url, 4, 16, 3, 1);
         this.add(saveBtn, 6, 17, 2, 1);
         this.add(cancelBtn, 8, 17, 2, 1);
         
-        //this.setGridLinesVisible(true);
+        this.setGridLinesVisible(true);
+    }
+    
+    private void setEndLowTime(String start_hour, String start_minute,
+                               String end_hour) {
+        int ehour = 0;
+        
+        if (end_hour == null) {
+            endHour.getItems().clear();
+        } else {
+            ehour = Integer.parseInt(end_hour.substring(0, 2));
+        }
+
+        endMinute.getItems().clear();
+
+        if (start_hour == null || start_minute == null)
+            return;
+
+        String[] hours = new String[]{"08am", "09am", "10am", "11am", "12pm",
+                                      "01pm", "02pm", "03pm", "04pm", "05pm"};
+
+        int shour = Integer.parseInt(start_hour.substring(0, 2));
+        int smin = Integer.parseInt(start_minute.substring(0, 2));
+
+        if (shour < 7) {
+            endHour.setItems(FXCollections.observableArrayList(
+                Arrays.copyOfRange(hours, shour + 5, 10)));
+        } else {
+            endHour.setItems(FXCollections.observableArrayList(
+                Arrays.copyOfRange(hours, shour - 8, 10)));
+        }
+
+        if (end_hour == null || ehour != shour) {
+            endMinute.setItems(FXCollections.observableArrayList(
+                Arrays.stream(IntStream.rangeClosed(0, 59).toArray())
+                    .mapToObj(n -> String.format("%02d", n))
+                        .collect(Collectors.toList())));
+        } else {
+            endMinute.setItems(FXCollections.observableArrayList(
+                Arrays.stream(IntStream.rangeClosed(smin, 59).toArray())
+                    .mapToObj(n -> String.format("%02d", n))
+                        .collect(Collectors.toList())));
+        }
     }
 }

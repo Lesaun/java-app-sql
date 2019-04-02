@@ -5,6 +5,7 @@
  */
 package softwareiiassessment;
 
+import java.util.Date;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -34,7 +35,7 @@ public class Softwareiiassessment extends Application {
     public void start(Stage primaryStage) {
         api = new SQLAPI();
 
-        calendarPane = new PaneCalendar(api);
+        calendarPane = new PaneCalendar(api, new Date());
         calendarScene = new Scene(calendarPane, 745, 382);
 
         calendarPane.setAddBtnEvent(event -> {
@@ -53,6 +54,10 @@ public class Softwareiiassessment extends Application {
         calendarPane.setDelBtnEvent(event -> {
             api.deleteCustomer(customerManagerPane.getSelectedCustomer());
             customerManagerPane.updateCustomers(api.getCustomers());            
+        });
+        
+        calendarPane.setCustomerManagerBtnEvent(event -> {
+            calendarManageCustomersBtnEvent();
         });
 
         primaryStage.setResizable(false);
@@ -78,6 +83,11 @@ public class Softwareiiassessment extends Application {
         customerManagerPane.setDelBtnEvent(event -> {
             api.deleteCustomer(customerManagerPane.getSelectedCustomer());
             customerManagerPane.updateCustomers(api.getCustomers());            
+        });
+        
+        customerManagerPane.setCancelBtnEvent(event -> {
+            primaryStage.setScene(calendarScene);
+            primaryStage.show();
         });
 
         primaryStage.setScene(customerManagerScene);
