@@ -1,7 +1,10 @@
 package softwareiiassessment;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,10 +27,16 @@ import javafx.scene.text.Text;
  * @author lesaun
  */
 public class PaneCalendar extends GridPane {
+    private TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
+
     private final RadioButton weekRadio = new RadioButton("Week");
     private final RadioButton monthRadio = new RadioButton("Month");
     private final ToggleGroup radioGroup = new ToggleGroup();
     private boolean weekView = true;
+
+    private final SQLAPI api;
+    private LocalDateTime currentDate;
+    private final Text calLocation;
 
     private final Button calPrev;
     private final Button calNext;
@@ -39,29 +48,25 @@ public class PaneCalendar extends GridPane {
     private final Button delBtn;
     private final Button logBtn;
     private TableView<ORMAppointment> tableView;
-    
 
-    /**
-     * Constructs the pane with given title and TableView
-     * 
-     * @param customers
-     */
-    PaneCalendar(SQLAPI api, Date startDate) {
+    PaneCalendar(SQLAPI api, LocalDateTime startDate) {
         // Setup toggle group
         weekRadio.setId("week");
         monthRadio.setId("month");
         weekRadio.setToggleGroup(radioGroup);
         monthRadio.setToggleGroup(radioGroup);
         weekRadio.setSelected(true);
-        
+
+        this.api = api;
+
         // Construct button
         this.calPrev = new Button();
         this.calPrev.setText("<");
-        
+
         // Construct button
         this.calNext = new Button();
         this.calNext.setText(">");
-        
+
         // Construct add button
         this.manageCustomersBtn = new Button();
         this.manageCustomersBtn.setText("Manage Customers");
@@ -71,17 +76,17 @@ public class PaneCalendar extends GridPane {
         this.addBtn = new Button();
         this.addBtn.setText("Add");
         this.addBtn.setPrefWidth(71);
-       
+
         // Constuct modify button
         this.modBtn = new Button();
         this.modBtn.setText("Modify");
         this.modBtn.setPrefWidth(71);
-        
+
         // Constuct delete button
         this.delBtn = new Button();
         this.delBtn.setText("Delete");
         this.delBtn.setPrefWidth(71);        
-        
+
         // Constuct delete button
         this.logBtn = new Button();
         this.logBtn.setText("Logout");
@@ -98,60 +103,62 @@ public class PaneCalendar extends GridPane {
 
         ColumnConstraints rightMarginCol = new ColumnConstraints(15);
         this.getColumnConstraints().add(rightMarginCol);
-        
-        
+
         // Add height constraint for rows
         for (int row_height : new int[]{15, 23, 6, 26, 6, 260, 6, 26, 24}) {
             RowConstraints row = new RowConstraints(row_height);
             this.getRowConstraints().add(row);
         }
+        
+        constructTableView();
+        currentDate = startDate;
+        calLocation = new Text(
+                currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
+                " - " +
+                currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
+        setTableViewToWeekOfYear(currentDate.get(woy), currentDate.getYear());
 
-        constructTableView(api);
-        
-        Calendar currentDate = Calendar.getInstance();
-        currentDate.setTime(startDate);
-        int startWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
-        int startYear = currentDate.get(Calendar.YEAR);
-        setTableViewToWeekOfYear(api, startWeek, startYear);
-        
         calPrev.setOnAction(e -> {
             if (weekRadio.isSelected()) {
-                currentDate.add(Calendar.DATE, -7);
-                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+                currentDate = currentDate.minusDays(7);
+                setTableViewToWeekOfYear(currentDate.get(woy),
+                                         currentDate.getYear());
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
+                " - " +
+                currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
-                currentDate.add(Calendar.MONTH, -1);
-                int tstartWeek = currentDate.get(Calendar.MONTH);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+                currentDate = currentDate.minusMonths(1);
+                setTableViewToMonthOfYear(currentDate.getMonthValue(),
+                                         currentDate.getYear());
             }
         });
         
         calNext.setOnAction(e -> {
             if (weekRadio.isSelected()) {
-                currentDate.add(Calendar.DATE, 7);
-                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+                currentDate = currentDate.plusDays(7);
+                setTableViewToWeekOfYear(currentDate.get(woy),
+                                         currentDate.getYear());
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
+                " - " +
+                currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
-                currentDate.add(Calendar.MONTH, 1);
-                int tstartWeek = currentDate.get(Calendar.MONTH);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+                currentDate = currentDate.plusMonths(1);
+                setTableViewToMonthOfYear(currentDate.getMonthValue(),
+                                         currentDate.getYear());
             }
         });
         
         radioGroup.selectedToggleProperty().addListener((ov, ot, new_toggle) -> {
             RadioButton selectedBtn = (RadioButton) new_toggle;
             if (selectedBtn.getId().equals("week")) {
-                int tstartWeek = currentDate.get(Calendar.WEEK_OF_YEAR);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToWeekOfYear(api, tstartWeek, tstartYear);
+                setTableViewToWeekOfYear(currentDate.get(woy),
+                                         currentDate.getYear());
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
+                " - " +
+                currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
-                int tstartWeek = currentDate.get(Calendar.MONTH);
-                int tstartYear = currentDate.get(Calendar.YEAR);
-                setTableViewToMonthOfYear(api, tstartWeek, tstartYear);
+                setTableViewToMonthOfYear(currentDate.getMonthValue(),
+                                         currentDate.getYear());
             }
         });
         
@@ -159,6 +166,7 @@ public class PaneCalendar extends GridPane {
         this.add(new Text("Calendar"), 1, 1, 3, 1);
         this.add(this.weekRadio, 1, 3, 2, 1);
         this.add(this.monthRadio, 3, 3, 2, 1);
+        this.add(this.calLocation, 10, 3, 3, 1);
         this.add(this.calPrev, 24, 3, 2, 1);
         this.add(this.calNext, 25, 3, 2, 1);
         this.add(this.tableView, 1, 5, 25, 1);
@@ -167,9 +175,11 @@ public class PaneCalendar extends GridPane {
         this.add(this.modBtn, 16, 7, 3, 1);
         this.add(this.delBtn, 19, 7, 3, 1);
         this.add(this.logBtn, 23, 7, 3, 1);
+        
+        this.setGridLinesVisible(true);
     }
     
-    private void constructTableView(SQLAPI api) {
+    private void constructTableView() {
         this.tableView = new TableView<>();
 
         TableColumn titleCol = new TableColumn("Title");
@@ -195,46 +205,40 @@ public class PaneCalendar extends GridPane {
         this.tableView.refresh();
     }
 
-    private void setTableViewToWeekOfYear(SQLAPI api, int week, int year) {
+    private void setTableViewToWeekOfYear(int week, int year) {
         setTableItems(api.getAppointmentsInWeek(week, year));
     }
     
-    private void setTableViewToMonthOfYear(SQLAPI api, int month, int year) {
+    private void setTableViewToMonthOfYear(int month, int year) {
         setTableItems(api.getAppointmentsByMonth(month, year));
     }
     
-    /**
-     * Set handler for add button event
-     * 
-     * @param handler handler for add button event
-     */
+    public void refreshCalendar() {
+        if (weekRadio.isSelected()) {
+            setTableViewToWeekOfYear(currentDate.get(woy),
+                                     currentDate.getYear());
+        } else {
+            setTableViewToMonthOfYear(currentDate.getMonthValue(),
+                                     currentDate.getYear());
+        }
+    }
+    
+    public ORMAppointment getSelectedAppointment() {
+        return tableView.getSelectionModel().getSelectedItem();
+    }
+
     public final void setAddBtnEvent(EventHandler<ActionEvent> handler) {
         this.addBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for mod button event
-     * 
-     * @param handler handler for mod button event
-     */
+
     public final void setModBtnEvent(EventHandler<ActionEvent> handler) {
         this.modBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for delete button event
-     * 
-     * @param handler handler for delete button event
-     */
+
     public final void setDelBtnEvent(EventHandler<ActionEvent> handler) {
         this.delBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for delete button event
-     * 
-     * @param handler handler for delete button event
-     */
+
     public final void setLogoutBtnEvent(EventHandler<ActionEvent> handler) {
         this.logBtn.setOnAction(handler);
     }

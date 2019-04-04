@@ -8,20 +8,21 @@ package softwareiiassessment;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.TimeZone;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -35,6 +36,7 @@ class SQLAPI {
     private final String PASSWORD = "53688557025";
     private boolean connected = false;
     
+    private TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
     private HashMap<Integer, ORMCountry> countries;
     private HashMap<Integer, ORMCity> cities;
     private HashMap<Integer, ORMAddress> addresses;
@@ -53,16 +55,6 @@ class SQLAPI {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(commandToExecute);
             return rs;
-//            ResultSetMetaData rsmd = rs.getMetaData();
-//            int columnsNumber = rsmd.getColumnCount();
-//            while (rs.next()) {
-//                for (int i = 1; i <= columnsNumber; i++) {
-//                    if (i > 1) System.out.print(",  ");
-//                    String columnValue = rs.getString(i);
-//                    System.out.print(columnValue + " " + rsmd.getColumnName(i));
-//                }
-//                System.out.println("");
-//            }
         } catch (SQLException ex) {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -203,8 +195,8 @@ class SQLAPI {
                         rs.getString("location"),
                         rs.getString("contact"),
                         rs.getString("url"),
-                        rs.getDate("start"),
-                        rs.getDate("end"),
+                        rs.getTimestamp("start").toLocalDateTime(),
+                        rs.getTimestamp("end").toLocalDateTime(),
                         rs.getString("createDate"),
                         rs.getString("createdBy"),
                         (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
@@ -213,11 +205,9 @@ class SQLAPI {
 
                 appointmentsById.put(appointment.getAppointmentId(), appointment);
 
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(appointment.getStart());
-                int weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
-                int year = cal.get(Calendar.YEAR);
-                SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
+                SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
+                    appointment.getStart().getYear(),
+                    appointment.getStart().get(woy));
 
                 if (!appointmentsByYearWeek.containsKey(yearWeekEntry)) {
                     appointmentsByYearWeek.put(yearWeekEntry, new ArrayList<>());
@@ -242,7 +232,7 @@ class SQLAPI {
     public ObservableList<ORMAppointment> getAppointmentsByMonth(int monthOfYear, int year) {
         ObservableList<ORMAppointment> appointmentsInMonth = FXCollections.observableArrayList();
 
-        Calendar cal = new GregorianCalendar(year, monthOfYear, 1);
+        Calendar cal = new GregorianCalendar(year, monthOfYear - 1, 1);
         int minWeek = cal.get(Calendar.WEEK_OF_YEAR);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
         int maxWeek = cal.get(Calendar.WEEK_OF_YEAR);
@@ -334,7 +324,7 @@ class SQLAPI {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("INSERT INTO customer " + 
                 "(customerId, customerName, addressId, active, " +
-                "createdate, createdBy, lastUpdateBy) " +
+                "createDate, createdBy, lastUpdateBy) " +
                 String.format("values (%1$d, \"%2$s\", \"%3$d\", \"%4$d\"," +
                               " NOW(), \"%5$s\", \"%5$s\")", 
                               maxId + 1, customerName, address.getAddressId(),
@@ -403,10 +393,108 @@ class SQLAPI {
                     "SET customerName = \"" + customerName +
                     "\", addressId = \"" + address.getAddressId() +
                     "\", active = " + Integer.toString(active ? 1 : 0) +
+                    ", lastUpdateBy = \"" + user + "\" " +
                     " WHERE customerId = " + Integer.toString(customer.getCustomerId())
             );
         } catch (SQLException ex) {
             System.out.println("SQL update error: " + ex.getMessage());
+        }
+    }
+
+    public void updateAppointment(ORMAppointment appointment,
+            ORMCustomer customer, String title, String description,
+            String location, String contact, String url, LocalDateTime start, 
+            LocalDateTime end, String user) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        appointment.setCustomerId(customer.getCustomerId());
+        appointment.setTitle(title);
+        appointment.setDescription(description);
+        appointment.setLocation(location);
+        appointment.setContact(contact);
+        appointment.setUrl(url);
+        appointment.setStart(start);
+        appointment.setEnd(end);
+
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE appointment " + 
+                "SET customerId = " + Integer.toString(customer.getCustomerId()) +
+                ", title = \"" + title + 
+                "\", description = \"" + description +
+                "\", location = \"" + location +
+                "\", contact = \"" + contact +
+                "\", url = \"" + url +
+                "\", start = \"" + start.format(formatter) +
+                "\", end = \"" + end.format(formatter) +
+                "\", lastUpdateBy = \"" + user + "\" " +
+                "WHERE appointmentId = " + 
+                Integer.toString(appointment.getAppointmentId()));
+        } catch (SQLException ex) {
+            System.out.println("SQL INSERT ERROR: " + ex.getMessage());
+        }
+    }
+
+    public ORMAppointment insertAppointment(ORMCustomer customer, String title,
+            String description, String location, String contact, String url,
+            LocalDateTime start, LocalDateTime end, String user) {
+        int maxId = Collections.max(appointmentsById.keySet());
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("INSERT INTO appointment " + 
+                "(appointmentId, customerId, title, description, location, " +
+                "contact, url, start, end, createDate, createdBy, lastUpdateBy) " +
+                String.format("values (%1$d, %2$d, \"%3$s\", \"%4$s\"," +
+                              " \"%5$s\", \"%6$s\", \"%7$s\",  \"%8$s\", " +
+                              "\"%9$s\", NOW(), \"%10$s\", \"%10$s\")", 
+                              maxId + 1, customer.getCustomerId(), title, 
+                              description, location, contact, url, 
+                              start.format(formatter), end.format(formatter),
+                              user));
+        } catch (SQLException ex) {
+            System.out.println("SQL INSERT ERROR: " + ex.getMessage());
+        }
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from appointment" +
+                    " where appointmentId=" + Integer.toString(maxId + 1));
+            
+            rs.next();
+            ORMAppointment appointment = new ORMAppointment(
+                rs.getInt("appointmentId"),
+                rs.getInt("customerId"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getString("location"),
+                rs.getString("contact"),
+                rs.getString("url"),
+                rs.getTimestamp("start").toLocalDateTime(),
+                rs.getTimestamp("end").toLocalDateTime(),
+                rs.getString("createDate"),
+                rs.getString("createdBy"),
+                (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
+                rs.getString("lastUpdateBy")
+            );
+
+            appointmentsById.put(appointment.getAppointmentId(), appointment);
+
+            SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
+                appointment.getStart().getYear(),
+                appointment.getStart().get(woy));
+
+            if (!appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+                appointmentsByYearWeek.put(yearWeekEntry, new ArrayList<>());
+            }
+
+            appointmentsByYearWeek.get(yearWeekEntry).add(appointment);
+
+            return appointment;
+        } catch (SQLException ex) {
+            System.out.println("SQL SELECT ERROR: " + ex.getMessage());
+            return null;
         }
     }
 
@@ -416,6 +504,10 @@ class SQLAPI {
 
     public ORMCity getCityById(int cityId) {
         return cities.get(cityId);
+    }
+    
+    public ORMCustomer getCustomerById(int customerId) {
+        return customers.get(customerId);
     }
 
     public ORMAddress getAddressById(int addressId) {
@@ -433,6 +525,23 @@ class SQLAPI {
             System.out.println("SQL update error: " + ex.getMessage());
         }
     }
+
+    public void deleteAppointment(ORMAppointment appointment) {
+        appointmentsById.remove(appointment.getAppointmentId());
+
+        SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
+            appointment.getStart().getYear(),
+            appointment.getStart().get(woy));
+
+        appointmentsByYearWeek.get(yearWeekEntry).remove(appointment);
+
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM appointment " +
+                    "WHERE appointmentId = " + Integer.toString(appointment.getAppointmentId())
+            );
+        } catch (SQLException ex) {
+            System.out.println("SQL update error: " + ex.getMessage());
+        }
+    }
 }
-
-

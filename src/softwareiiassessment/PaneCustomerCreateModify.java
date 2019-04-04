@@ -11,11 +11,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-/**
- * A Pane for modifying or adding parts to the inventory
- *
- * @author lesaun
- */
+
 public class PaneCustomerCreateModify extends GridPane {
     private final RadioButton activeRadio = new RadioButton("Active");
     private final RadioButton disabledRadio = new RadioButton("Disabled");
@@ -39,11 +35,7 @@ public class PaneCustomerCreateModify extends GridPane {
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
     
-    
 
-    /**
-     * Constructs the Pane
-     */
     public PaneCustomerCreateModify() {
         // Setup toggle group
         activeRadio.setId("active");
@@ -123,108 +115,50 @@ public class PaneCustomerCreateModify extends GridPane {
         return address;
     }
 
-    /**
-     * Check if fields contain a valid customer
-     * 
-     * @return if customer is valid
-     */
     public boolean hasValidCustomer() {
         return true;
     }
     
-    /**
-     * Displays errors with current fields
-     */
     public void displayErrors() {
 
     }
 
-    /**
-     * Sets the event handler for the save button
-     * 
-     * @param handler the event handler for the save button
-     */
     public final void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
         this.saveBtn.setOnAction(handler);
     }
     
-    /**
-     * Sets the event handler for the cancel button
-     * 
-     * @param handler the event handler for the cancel button
-     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
 
-    /**
-     * Sets the event handler for the address add button
-     * 
-     * @param handler the event handler for the save button
-     */
     public final void setAddressAddEvent(EventHandler<ActionEvent> handler) {
         this.addressAdd.setOnAction(handler);
     }
     
-    /**
-     * Sets the event handler for the address edit button
-     * 
-     * @param handler the event handler for the cancel button
-     */
     public final void setAddressEditEvent(EventHandler<ActionEvent> handler) {
         this.addressEdit.setOnAction(handler);
     }
   
-    /**
-     * Sets the event handler for the address select button
-     * 
-     * @param handler the event handler for the cancel button
-     */
     public final void setAddressSelectEvent(EventHandler<ActionEvent> handler) {
         this.addressSelect.setOnAction(handler);
     }
     
-    /**
-     * Sets the value in the ID Text Field
-     * 
-     * @param id the value to set in ID Text Field
-     */
     public void setIdTextField(String id) {
         idTextField.setText(id);
     }
 
-    /**
-     * Returns the string value in the name Text Field
-     * 
-     * @return the string value in the name Text Field
-     */
     public String getNameTextField() {
         return nameTextField.getText();
     }
 
-    /**
-     * Sets the value in the name Text Field
-     * 
-     * @param name the value to set in ID Text Field
-     */
     public void setNameTextField(String name) {
         nameTextField.setText(name);
     }
 
-    /**
-     * Returns if customer is active
-     * 
-     * @return if customer is active
-     */
     public boolean isActive() {
         return active;
     }
 
-    /**
-     * Sets customer to active or disabled
-     * 
-     * @param active if customer is active
-     */
     public void setActive(boolean active) {      
         if (active) {
             activeRadio.setSelected(true);
@@ -233,8 +167,6 @@ public class PaneCustomerCreateModify extends GridPane {
         }
 
         this.active = active;
-    }
-    
-    
+    }    
 }
 

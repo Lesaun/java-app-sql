@@ -5,6 +5,7 @@
  */
 package softwareiiassessment;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -35,12 +36,41 @@ public class Softwareiiassessment extends Application {
     public void start(Stage primaryStage) {
         api = new SQLAPI();
 
-        calendarPane = new PaneCalendar(api, new Date());
+        calendarPane = new PaneCalendar(api, LocalDateTime.now());
         calendarScene = new Scene(calendarPane, 745, 382);
 
         calendarPane.setAddBtnEvent(event -> {
             currentAppointmentPane = new PaneAppointmentCreateModify(api);
-            currentAppointmentScene = new Scene(currentAppointmentPane, 480, 880);
+            currentAppointmentScene = new Scene(currentAppointmentPane, 480, 600);
+
+            currentAppointmentPane.setSelectBtnEvent(e -> {
+                appointmentPaneSelectBtnEvent();
+            });
+            
+            currentAppointmentPane.setSaveBtnEvent(e -> {
+                api.insertAppointment(
+                    currentAppointmentPane.getCustomer(),
+                    currentAppointmentPane.getTitle(),
+                    currentAppointmentPane.getDescription(),
+                    currentAppointmentPane.getLocation(),
+                    currentAppointmentPane.getContact(),
+                    currentAppointmentPane.getUrl(),
+                    currentAppointmentPane.getStart(),
+                    currentAppointmentPane.getEnd(),
+                    user);
+
+                calendarPane.refreshCalendar();
+                primaryStage.hide();
+                primaryStage.setScene(calendarScene);
+                primaryStage.show();
+            });
+
+            
+            currentAppointmentPane.setCancelBtnEvent(e -> {
+                primaryStage.hide();
+                primaryStage.setScene(calendarScene);
+                primaryStage.show();
+            });
 
             primaryStage.hide();
             primaryStage.setScene(currentAppointmentScene);
@@ -48,17 +78,64 @@ public class Softwareiiassessment extends Application {
         });
         
         calendarPane.setModBtnEvent(event -> {
-            customerManagerModBtnEvent();
+            currentAppointmentPane = new PaneAppointmentCreateModify(api);
+            currentAppointmentScene = new Scene(currentAppointmentPane, 480, 600);
+            
+            ORMAppointment appointment = calendarPane.getSelectedAppointment();
+            currentAppointmentPane.setIdTextField(Integer.toString(appointment.getAppointmentId()));
+            currentAppointmentPane.setCustomer(api.getCustomerById(appointment.getCustomerId()));
+            currentAppointmentPane.setTitle(appointment.getTitle());
+            currentAppointmentPane.setDescription(appointment.getDescription());
+            currentAppointmentPane.setLocation(appointment.getLocation());
+            currentAppointmentPane.setContact(appointment.getContact());
+            currentAppointmentPane.setUrl(appointment.getUrl());
+            currentAppointmentPane.setStart(appointment.getStart());
+            currentAppointmentPane.setEnd(appointment.getEnd());
+
+            currentAppointmentPane.setSelectBtnEvent(e -> {
+                appointmentPaneSelectBtnEvent();
+            });
+            
+            currentAppointmentPane.setSaveBtnEvent(e -> {
+                api.updateAppointment(
+                    appointment,
+                    currentAppointmentPane.getCustomer(),
+                    currentAppointmentPane.getTitle(),
+                    currentAppointmentPane.getDescription(),
+                    currentAppointmentPane.getLocation(),
+                    currentAppointmentPane.getContact(),
+                    currentAppointmentPane.getUrl(),
+                    currentAppointmentPane.getStart(),
+                    currentAppointmentPane.getEnd(),
+                    user);
+
+                calendarPane.refreshCalendar();
+                primaryStage.hide();
+                primaryStage.setScene(calendarScene);
+                primaryStage.show();
+            });
+            
+            currentAppointmentPane.setCancelBtnEvent(e -> {
+                primaryStage.hide();
+                primaryStage.setScene(calendarScene);
+                primaryStage.show();
+            });
+
+            primaryStage.hide();
+            primaryStage.setScene(currentAppointmentScene);
+            primaryStage.show();
         });
         
         calendarPane.setDelBtnEvent(event -> {
-            api.deleteCustomer(customerManagerPane.getSelectedCustomer());
-            customerManagerPane.updateCustomers(api.getCustomers());            
+            api.deleteAppointment(calendarPane.getSelectedAppointment());
+            calendarPane.refreshCalendar();
         });
         
         calendarPane.setCustomerManagerBtnEvent(event -> {
             calendarManageCustomersBtnEvent();
         });
+        
+        calendarPane.setLogoutBtnEvent(e -> primaryStage.close());
 
         primaryStage.setResizable(false);
         primaryStage.setTitle("Appointment Manager");
@@ -67,7 +144,33 @@ public class Softwareiiassessment extends Application {
 
         this.primaryStage = primaryStage;
     }
-    
+
+    private void appointmentPaneSelectBtnEvent() {
+        PaneSelectCustomer customerSelectPane = new PaneSelectCustomer(api);
+        Scene customerSelectScene = new Scene(customerSelectPane, 580, 260);
+
+        customerSelectPane.setSelectBtnEvent(event1 -> {
+            ORMCustomer customer = customerSelectPane.getSelectedCustomer();
+
+            currentAppointmentPane.setCustomer(customer);
+
+            primaryStage.hide();
+            primaryStage.setScene(currentAppointmentScene);
+            primaryStage.show();
+        });
+
+        customerSelectPane.setCancelBtnEvent(event1 -> {
+            primaryStage.hide();
+            primaryStage.setScene(currentAppointmentScene);
+            primaryStage.show();
+        });
+
+
+        primaryStage.hide();
+        primaryStage.setScene(customerSelectScene);
+        primaryStage.show();
+    }
+
     private void calendarManageCustomersBtnEvent() {
         customerManagerPane = new PaneCustomerManager(api);
         customerManagerScene = new Scene(customerManagerPane, 580, 260);

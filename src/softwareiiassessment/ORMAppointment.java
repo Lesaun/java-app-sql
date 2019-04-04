@@ -5,14 +5,11 @@
  */
 package softwareiiassessment;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-/**
- *
- * @author v-leharv
- */
+
 public class ORMAppointment {
     private final SimpleIntegerProperty appointmentId;
     private final SimpleIntegerProperty customerId;
@@ -21,8 +18,8 @@ public class ORMAppointment {
     private final SimpleStringProperty location;
     private final SimpleStringProperty contact;
     private final SimpleStringProperty url;
-    private Date start;
-    private Date end;
+    private LocalDateTime start;
+    private LocalDateTime end;
 
     private final SimpleStringProperty createDate;
     private final SimpleStringProperty createdBy;
@@ -31,7 +28,7 @@ public class ORMAppointment {
 
     ORMAppointment(int appointmentId, int customerId, String title,
             String description, String location, String contact, String url,
-            Date start, Date end, String createDate, 
+            LocalDateTime start, LocalDateTime end, String createDate, 
             String createdBy, int lastUpdate, String lastUpdateBy) { 
         this.appointmentId = new SimpleIntegerProperty(appointmentId);
         this.customerId = new SimpleIntegerProperty(customerId);
@@ -137,21 +134,19 @@ public class ORMAppointment {
         this.url.set(url);
     }
 
-    public Date getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 }
-        
-

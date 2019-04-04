@@ -1,7 +1,6 @@
 package softwareiiassessment;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -13,22 +12,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-/**
- * A Pane with TableView and controls
- * 
- * @author lesaun
- */
+
 public class PaneSelectAddress extends GridPane {
     private final Button selBtn;
     private final Button canBtn;
     private TableView<ORMAddress> tableView = new TableView<>();
-    
 
-    /**
-     * Constructs the pane with given title and TableView
-     * 
-     * @param customers
-     */
     PaneSelectAddress(SQLAPI api) {
        
         // Constuct delete button
@@ -105,25 +94,15 @@ public class PaneSelectAddress extends GridPane {
                 countryNameCol, postalCol, phoneCol);
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
-    
-    /**
-     * Set handler for cancel button event
-     * 
-     * @param handler handler for cancel button event
-     */
+
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for select button event
-     * 
-     * @param handler handler for select button event
-     */
+
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selBtn.setOnAction(handler);
     }
-    
+
     public ORMAddress getSelectedAddress() {
         return tableView.getSelectionModel().getSelectedItem();
     }

@@ -1,5 +1,7 @@
 package softwareiiassessment;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -16,11 +18,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-/**
- * A Pane for modifying or adding parts to the inventory
- *
- * @author lesaun
- */
+
 public class PaneAppointmentCreateModify extends GridPane {
     
     private final TextField idTextField = new TextField();
@@ -40,6 +38,7 @@ public class PaneAppointmentCreateModify extends GridPane {
        
     private final Button selectBtn = new Button("Select");
     private final Text customerName = new Text("");
+    private ORMCustomer customer;
 
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
@@ -98,8 +97,8 @@ public class PaneAppointmentCreateModify extends GridPane {
         RowConstraints topMargin = new RowConstraints(15);
         this.getRowConstraints().add(topMargin);
 
-        for (int i = 0; i < 17; i++) {
-            RowConstraints row = new RowConstraints(50);
+        for (int i = 0; i < 19; i++) {
+            RowConstraints row = new RowConstraints(30);
             this.getRowConstraints().add(row);
         }
 
@@ -112,26 +111,27 @@ public class PaneAppointmentCreateModify extends GridPane {
         this.add(idTextField, 4, 2, 3, 1);
         this.add(new Text("Title"), 2, 3, 1, 1);
         this.add(title, 4, 3, 3, 1);
-        this.add(new Text("Description"), 2, 4, 1, 1);
-        this.add(description, 2, 5, 5, 2);
-        this.add(new Text("Location"), 2, 7, 1, 1);
-        this.add(location, 2, 8, 5, 2);
-        this.add(new Text("Contact"), 2, 10, 3, 1);
-        this.add(contact, 2, 11, 5, 2);
-        this.add(new Text("Start Date"), 2, 13, 1, 1);
-        this.add(startDate, 4, 13, 3, 1);
-        this.add(new Text("Start Time"), 2, 14, 1, 1);
-        this.add(startHour, 4, 14, 2, 1);
-        this.add(startMinute, 6, 14, 2, 1);
-        this.add(new Text("End Time"), 2, 15, 1, 1);
-        this.add(endHour, 4, 15, 2, 1);
-        this.add(endMinute, 6, 15, 2, 1);
-        this.add(new Text("URL"), 2, 16, 1, 1);
-        this.add(url, 4, 16, 3, 1);
-        this.add(saveBtn, 6, 17, 2, 1);
-        this.add(cancelBtn, 8, 17, 2, 1);
-        
-        this.setGridLinesVisible(true);
+        this.add(new Text("Customer"), 2, 4, 1, 1);
+        this.add(selectBtn, 4, 4, 1, 1);
+        this.add(customerName, 2, 5, 1, 1);
+        this.add(new Text("Description"), 2, 6, 1, 1);
+        this.add(description, 2, 7, 5, 2);
+        this.add(new Text("Location"), 2, 9, 1, 1);
+        this.add(location, 2, 10, 5, 2);
+        this.add(new Text("Contact"), 2, 12, 3, 1);
+        this.add(contact, 2, 13, 5, 2);
+        this.add(new Text("Start Date"), 2, 15, 1, 1);
+        this.add(startDate, 4, 15, 3, 1);
+        this.add(new Text("Start Time"), 2, 16, 1, 1);
+        this.add(startHour, 4, 16, 2, 1);
+        this.add(startMinute, 6, 16, 2, 1);
+        this.add(new Text("End Time"), 2, 17, 1, 1);
+        this.add(endHour, 4, 17, 2, 1);
+        this.add(endMinute, 6, 17, 2, 1);
+        this.add(new Text("URL"), 2, 18, 1, 1);
+        this.add(url, 4, 18, 3, 1);
+        this.add(saveBtn, 6, 19, 2, 1);
+        this.add(cancelBtn, 8, 19, 2, 1);
     }
     
     private void setEndLowTime(String start_hour, String start_minute,
@@ -174,5 +174,154 @@ public class PaneAppointmentCreateModify extends GridPane {
                     .mapToObj(n -> String.format("%02d", n))
                         .collect(Collectors.toList())));
         }
+    }
+    
+    public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
+        this.selectBtn.setOnAction(handler);
+    }
+    
+    public void setCustomer(ORMCustomer customer) {
+        customerName.setText(customer.getCustomerName());
+        this.customer = customer;
+        customerSelected = true;
+    }
+    
+    public ORMCustomer getCustomer() {
+        if (!customerSelected)
+            return null;
+        return customer;
+    }
+
+    public final void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
+        this.saveBtn.setOnAction(handler);
+    }
+
+    public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
+        this.cancelBtn.setOnAction(handler);
+    }
+
+    public String getIdTextField() {
+        return idTextField.getText();
+    }
+
+    public void setIdTextField(String id) {
+        this.idTextField.setText(id);
+    }
+
+    public String getTitle() {
+        return title.getText();
+    }
+
+    public void setTitle(String title) {
+        this.title.setText(title);
+    }
+
+    public String getDescription() {
+        return description.getText();
+    }
+
+    public void setDescription(String description) {
+        this.description.setText(description);
+    }
+
+    public String getLocation() {
+        return location.getText();
+    }
+
+    public void setLocation(String location) {
+        this.location.setText(location);
+    }
+
+    public String getContact() {
+        return contact.getText();
+    }
+
+    public void setContact(String contact) {
+        this.contact.setText(contact);
+    }
+
+    public String getUrl() {
+        return url.getText();
+    }
+
+    public void setUrl(String url) {
+        this.url.setText(url);
+    }
+
+    public LocalDateTime getStart() {
+        LocalDate startDateOnly = startDate.getValue();
+        int shour;
+        
+        if (startHour.getValue().contains("pm") && !startHour.getValue().contains("12")) {
+            shour = Integer.parseInt(startHour.getValue().substring(0, 2)) + 12;
+        } else {
+            shour = Integer.parseInt(startHour.getValue().substring(0, 2));
+        }
+
+        return startDateOnly.atTime(shour,
+               Integer.parseInt(startMinute.getValue()),
+               00);
+    }
+
+    public void setStart(LocalDateTime start) {
+        startDate.setValue(start.toLocalDate());
+        String hour;
+        
+        if (start.getHour() < 12) {
+            if (start.getHour() < 10) {
+                hour = String.format("0%dam", start.getHour());
+            } else {
+                hour = String.format("%dam", start.getHour());
+            }
+        } else if (start.getHour() == 12) {
+            hour = String.format("%dam", start.getHour());
+        } else {
+            hour = String.format("%dpm", start.getHour() - 12);
+        }
+
+        startHour.setValue(hour);
+        startMinute.setValue(String.format("%02d", start.getMinute()));
+    }
+
+    public LocalDateTime getEnd() {
+         LocalDate startDateOnly = startDate.getValue();
+        int ehour;
+
+        if (endHour.getValue().contains("pm") && !endHour.getValue().contains("12")) {
+            ehour = Integer.parseInt(endHour.getValue().substring(0, 2)) + 12;
+        } else {
+            ehour = Integer.parseInt(endHour.getValue().substring(0, 2));
+        }
+
+        return startDateOnly.atTime(ehour,
+               Integer.parseInt(endMinute.getValue()),
+               00);
+    }
+
+    public void setEnd(LocalDateTime end) {
+        String hour;
+        
+        if (end.getHour() < 12) {
+            if (end.getHour() < 10) {
+                hour = String.format("0%dam", end.getHour());
+            } else {
+                hour = String.format("%dam", end.getHour());
+            }
+        } else if (end.getHour() == 12) {
+            hour = String.format("%dam", end.getHour());
+        } else {
+            hour = String.format("0%dpm", end.getHour() - 12);
+        }
+
+        endHour.setValue(hour);
+        endMinute.setValue(String.format("%02d", end.getMinute()));
+    }
+
+    public boolean isCustomerSelected() {
+        return customerSelected;
+    }
+
+    public void setCustomerSelected(boolean customerSelected) {
+        this.customerSelected = customerSelected;
     }
 }

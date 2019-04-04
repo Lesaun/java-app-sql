@@ -1,7 +1,6 @@
 package softwareiiassessment;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -22,13 +21,7 @@ public class PaneSelectCustomer extends GridPane {
     private final Button selBtn;
     private final Button canBtn;
     private TableView<ORMCustomer> tableView = new TableView<>();
-    
 
-    /**
-     * Constructs the pane with given title and TableView
-     * 
-     * @param customers
-     */
     PaneSelectCustomer(SQLAPI api) {
        
         // Constuct delete button
@@ -97,26 +90,16 @@ public class PaneSelectCustomer extends GridPane {
         tableView.getColumns().addAll(activeCol, customerNameCol, phoneCol, postalCodeCol);
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
-    
-    /**
-     * Set handler for cancel button event
-     * 
-     * @param handler handler for cancel button event
-     */
+
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for select button event
-     * 
-     * @param handler handler for select button event
-     */
+
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selBtn.setOnAction(handler);
     }
     
-    public ORMCustomer getSelectedAddress() {
+    public ORMCustomer getSelectedCustomer() {
         return tableView.getSelectionModel().getSelectedItem();
     }
 }

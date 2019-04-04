@@ -1,6 +1,5 @@
 package softwareiiassessment;
 
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -12,11 +11,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-/**
- * A Pane for modifying or adding parts to the inventory
- *
- * @author lesaun
- */
+
 public class PaneAddressCreateModify extends GridPane {
     
     private final TextField idTextField = new TextField();
@@ -28,8 +23,6 @@ public class PaneAddressCreateModify extends GridPane {
     
     private final ComboBox<ORMCountry> countryDropDown = new ComboBox<>();
     private final ComboBox<ORMCity> cityDropDown = new ComboBox<>();
-       
-    private final Text cityCountry = new Text("");
 
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
@@ -128,101 +121,46 @@ public class PaneAddressCreateModify extends GridPane {
         this.countryDropDown.setValue(country);
     }
 
-    /**
-     * Sets the event handler for the save button
-     * 
-     * @param handler the event handler for the save button
-     */
     public final void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
         this.saveBtn.setOnAction(handler);
     }
     
-    /**
-     * Sets the event handler for the cancel button
-     * 
-     * @param handler the event handler for the cancel button
-     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
   
-    /**
-     * Sets the value in the ID Text Field
-     * 
-     * @param id the value to set in ID Text Field
-     */
     public void setIdTextField(String id) {
         idTextField.setText(id);
     }
 
-    /**
-     * Returns the string value in the name Text Field
-     * 
-     * @return the string value in the name Text Field
-     */
     public String getAddress1TextField() {
         return address1.getText();
     }
 
-    /**
-     * Sets the value in the name Text Field
-     * 
-     * @param address1 the value to set in ID Text Field
-     */
     public void setAddress1TextField(String address1) {
         this.address1.setText(address1);
     }
 
-    /**
-     * Returns the string value in the name Text Field
-     * 
-     * @return the string value in the name Text Field
-     */
     public String getAddress2TextField() {
         return address2.getText();
     }
 
-    /**
-     * Sets the value in the name Text Field
-     * 
-     * @param address2 the value to set in ID Text Field
-     */
     public void setAddress2TextField(String address2) {
         this.address2.setText(address2);
     }
     
-        /**
-     * Returns the string value in the name Text Field
-     * 
-     * @return the string value in the name Text Field
-     */
     public String getPostalTextField() {
         return postalCode.getText();
     }
 
-    /**
-     * Sets the value in the name Text Field
-     * 
-     * @param postalCode the value to set in ID Text Field
-     */
     public void setPostalTextField(String postalCode) {
         this.postalCode.setText(postalCode);
     }
     
-    /**
-     * Returns the string value in the name Text Field
-     * 
-     * @return the string value in the name Text Field
-     */
     public String getPhoneTextField() {
         return phone.getText();
     }
 
-    /**
-     * Sets the value in the name Text Field
-     * 
-     * @param phone the value to set in ID Text Field
-     */
     public void setPhoneTextField(String phone) {
         this.phone.setText(phone);
     }
@@ -234,6 +172,7 @@ public class PaneAddressCreateModify extends GridPane {
     public ORMCountry getSelectedCountry() {
         return countryDropDown.getSelectionModel().getSelectedItem();
     }
+
     public boolean isCitySelected() {
         return citySelected;
     }

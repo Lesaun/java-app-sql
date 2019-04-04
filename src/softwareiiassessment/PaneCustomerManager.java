@@ -24,13 +24,7 @@ public class PaneCustomerManager extends GridPane {
     private final Button delBtn;
     private final Button canBtn;
     private TableView<ORMCustomer> tableView;
-    
 
-    /**
-     * Constructs the pane with given title and TableView
-     * 
-     * @param customers
-     */
     PaneCustomerManager(SQLAPI api) {
 
         // Construct add button
@@ -112,38 +106,18 @@ public class PaneCustomerManager extends GridPane {
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    /**
-     * Set handler for add button event
-     * 
-     * @param handler handler for add button event
-     */
     public final void setAddBtnEvent(EventHandler<ActionEvent> handler) {
         this.addBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for mod button event
-     * 
-     * @param handler handler for mod button event
-     */
+
     public final void setModBtnEvent(EventHandler<ActionEvent> handler) {
         this.modBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for delete button event
-     * 
-     * @param handler handler for delete button event
-     */
+
     public final void setDelBtnEvent(EventHandler<ActionEvent> handler) {
         this.delBtn.setOnAction(handler);
     }
-    
-    /**
-     * Set handler for delete button event
-     * 
-     * @param handler handler for delete button event
-     */
+
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
