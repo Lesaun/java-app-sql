@@ -13,11 +13,11 @@ public class ORMCountry {
     private final SimpleStringProperty lastUpdateBy;
 
     ORMCountry(int countryId, String country,
-            String createDate, String createdBy, 
-            int lastUpdate, String lastUpdateBy) {
+               String createDate, String createdBy,
+               int lastUpdate, String lastUpdateBy) {
         this.countryId = new SimpleIntegerProperty(countryId);
         this.country = new SimpleStringProperty(country);
-        
+
         this.createDate = new SimpleStringProperty(createDate);
         this.createdBy = new SimpleStringProperty(createdBy);
         this.lastUpdate = new SimpleIntegerProperty(lastUpdate);
@@ -39,7 +39,7 @@ public class ORMCountry {
     public void setCountry(String country) {
         this.country.set(country);
     }
-    
+
     public String getCreateDate() {
         return createDate.get();
     }

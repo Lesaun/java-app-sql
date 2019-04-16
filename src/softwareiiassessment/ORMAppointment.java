@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package softwareiiassessment;
 
 import java.time.LocalDateTime;
@@ -14,6 +9,7 @@ public class ORMAppointment {
     private final SimpleIntegerProperty appointmentId;
     private final SimpleIntegerProperty customerId;
     private final SimpleStringProperty title;
+    private final SimpleStringProperty type;
     private final SimpleStringProperty description;
     private final SimpleStringProperty location;
     private final SimpleStringProperty contact;
@@ -26,26 +22,27 @@ public class ORMAppointment {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    ORMAppointment(int appointmentId, int customerId, String title,
+    ORMAppointment(int appointmentId, int customerId, String title, String type,
             String description, String location, String contact, String url,
-            LocalDateTime start, LocalDateTime end, String createDate, 
-            String createdBy, int lastUpdate, String lastUpdateBy) { 
+            LocalDateTime start, LocalDateTime end, String createDate,
+            String createdBy, int lastUpdate, String lastUpdateBy) {
         this.appointmentId = new SimpleIntegerProperty(appointmentId);
         this.customerId = new SimpleIntegerProperty(customerId);
         this.title = new SimpleStringProperty(title);
+        this.type = new SimpleStringProperty(type);
         this.description = new SimpleStringProperty(description);
         this.location = new SimpleStringProperty(location);
         this.contact = new SimpleStringProperty(contact);
         this.url = new SimpleStringProperty(url);
         this.start = start;
         this.end = end;
-        
+
         this.createDate = new SimpleStringProperty(createDate);
         this.createdBy = new SimpleStringProperty(createdBy);
         this.lastUpdate = new SimpleIntegerProperty(lastUpdate);
         this.lastUpdateBy = new SimpleStringProperty(lastUpdateBy);
     }
- 
+
     public int getAppointmentId() {
         return appointmentId.get();
     }
@@ -53,7 +50,7 @@ public class ORMAppointment {
     public void setAppointmentId(int addressId) {
         this.appointmentId.set(addressId);
     }
-    
+
     public String getCreateDate() {
         return createDate.get();
     }
@@ -100,6 +97,14 @@ public class ORMAppointment {
 
     public void setTitle(String title) {
         this.title.set(title);
+    }
+
+    public String getType() {
+        return type.get();
+    }
+
+    public void setType(String type) {
+        this.type.set(type);
     }
 
     public String getDescription() {

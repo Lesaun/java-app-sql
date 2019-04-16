@@ -35,7 +35,7 @@ class SQLAPI {
     private final String USER = "U05nwl";
     private final String PASSWORD = "53688557025";
     private boolean connected = false;
-    
+
     private TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
     private HashMap<Integer, ORMCountry> countries;
     private HashMap<Integer, ORMCity> cities;
@@ -45,10 +45,10 @@ class SQLAPI {
     private HashMap<SimpleImmutableEntry<Integer, Integer>,
         ArrayList<ORMAppointment>> appointmentsByYearWeek;
 
-    SQLAPI() {   
+    SQLAPI() {
         initConnection();
         loadDBIntoMemory();
-    }   
+    }
 
     public ResultSet runSQLCommand(String commandToExecute) {
         try {
@@ -65,7 +65,7 @@ class SQLAPI {
         try {
             Class.forName(DRIVER);
             conn = DriverManager.getConnection(URL + DATABASE, USER, PASSWORD);
-            System.out.println("Connected to database : " + DATABASE); 
+            System.out.println("Connected to database : " + DATABASE);
             connected = true;
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
@@ -107,7 +107,7 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void loadCountiesIntoMemory() {
         ResultSet rs = runSQLCommand("select * from country;");
         countries = new HashMap<>();
@@ -129,7 +129,7 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void loadAddressesIntoMemory() {
         ResultSet rs = runSQLCommand("select * from address;");
         addresses = new HashMap<>();
@@ -155,7 +155,7 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void loadCustomersIntoMemory() {
         ResultSet rs = runSQLCommand("select * from customer;");
         customers = new HashMap<>();
@@ -179,7 +179,7 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void loadAppointmentsIntoMemory() {
         ResultSet rs = runSQLCommand("select * from appointment;");
         appointmentsById = new HashMap<>();
@@ -188,20 +188,20 @@ class SQLAPI {
         try {
             while (rs.next()) {
                 ORMAppointment appointment = new ORMAppointment(
-                        rs.getInt("appointmentId"),
-                        rs.getInt("customerId"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getString("location"),
-                        rs.getString("contact"),
-                        rs.getString("url"),
-                        rs.getTimestamp("start").toLocalDateTime(),
-                        rs.getTimestamp("end").toLocalDateTime(),
-                        rs.getString("createDate"),
-                        rs.getString("createdBy"),
-                        (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
-                        rs.getString("lastUpdateBy")
-                );
+                    rs.getInt("appointmentId"),
+                    rs.getInt("customerId"),
+                    rs.getString("title"),
+                    rs.getString("type"),
+                    rs.getString("description"),
+                    rs.getString("location"),
+                    rs.getString("contact"),
+                    rs.getString("url"),
+                    rs.getTimestamp("start").toLocalDateTime(),
+                    rs.getTimestamp("end").toLocalDateTime(),
+                    rs.getString("createDate"),
+                    rs.getString("createdBy"),
+                    (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
+                    rs.getString("lastUpdateBy"));
 
                 appointmentsById.put(appointment.getAppointmentId(), appointment);
 
@@ -220,9 +220,26 @@ class SQLAPI {
         }
     }
 
+    public boolean isUsernamePasswordValid(String username, String password) {
+        ResultSet rs = runSQLCommand("select * from user where " +
+                       "lower(username) = \"" + username.toLowerCase() + "\";");
+
+        try {
+            while (rs.next()) {
+                if (rs.getString("password").equals(password)) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
     public ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
         SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
-        
+
         if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
             return FXCollections.observableArrayList(appointmentsByYearWeek.get(yearWeekEntry));
         }
@@ -236,15 +253,15 @@ class SQLAPI {
         int minWeek = cal.get(Calendar.WEEK_OF_YEAR);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
         int maxWeek = cal.get(Calendar.WEEK_OF_YEAR);
-        
+
         for (int i = minWeek; i < maxWeek; i++) {
             SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, i);
-            
+
             if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
                 appointmentsInMonth.addAll(appointmentsByYearWeek.get(yearWeekEntry));
             }
         }
-      
+
         return appointmentsInMonth;
     }
 
@@ -263,26 +280,26 @@ class SQLAPI {
     public ObservableList<ORMCountry> getCountries() {
         return FXCollections.observableArrayList(countries.values());
     }
-    
+
     public ObservableList<ORMAddress> getAddresses() {
         return FXCollections.observableArrayList(addresses.values());
     }
-    
+
     public ObservableList<ORMCustomer> getCustomers() {
         return FXCollections.observableArrayList(customers.values());
     }
-    
+
     public ORMAddress insertAddress(String address1, String address2,
             String postalCode, String phone, ORMCity city, String user) {
         int maxId = Collections.max(addresses.keySet());
 
         try {
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("INSERT INTO address " + 
-                "(addressId, address, address2, cityId, postalCode, phone, " + 
+            stmt.executeUpdate("INSERT INTO address " +
+                "(addressId, address, address2, cityId, postalCode, phone, " +
                 "createDate, createdBy, lastUpdateBy) " +
-                String.format("VALUES (%1$d, \"%2$s\", \"%3$s\", %4$d, " + 
-                    "\"%5$s\", \"%6$s\", NOW(), \"%7$s\", \"%7$s\")", 
+                String.format("VALUES (%1$d, \"%2$s\", \"%3$s\", %4$d, " +
+                    "\"%5$s\", \"%6$s\", NOW(), \"%7$s\", \"%7$s\")",
                     maxId + 1, address1, address2, city.getCityId(), postalCode,
                     phone, user));
         } catch (SQLException ex) {
@@ -291,9 +308,9 @@ class SQLAPI {
 
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from address" + 
+            ResultSet rs = stmt.executeQuery("select * from address" +
                     " where addressId=" + Integer.toString(maxId + 1));
-            
+
             rs.next();
             ORMAddress address = new ORMAddress(
                 rs.getInt("addressId"),
@@ -315,29 +332,29 @@ class SQLAPI {
             return null;
         }
     }
-    
+
     public ORMCustomer insertCustomer(String customerName, boolean active,
             ORMAddress address, String user) {
         int maxId = Collections.max(customers.keySet());
 
         try {
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("INSERT INTO customer " + 
+            stmt.executeUpdate("INSERT INTO customer " +
                 "(customerId, customerName, addressId, active, " +
                 "createDate, createdBy, lastUpdateBy) " +
                 String.format("values (%1$d, \"%2$s\", \"%3$d\", \"%4$d\"," +
-                              " NOW(), \"%5$s\", \"%5$s\")", 
+                              " NOW(), \"%5$s\", \"%5$s\")",
                               maxId + 1, customerName, address.getAddressId(),
                               active ? 1 : 0, user));
         } catch (SQLException ex) {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
         }
-        
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("select * from customer" +
                     " where customerId=" + Integer.toString(maxId + 1));
-            
+
             rs.next();
             ORMCustomer customer = new ORMCustomer(
                 rs.getInt("customerId"),
@@ -349,7 +366,7 @@ class SQLAPI {
                 (int) (rs.getTimestamp("lastUpdate").getTime() / 1000),
                 rs.getString("lastUpdateBy")
             );
-            
+
             customers.put(customer.getCustomerId(), customer);
             return customer;
         } catch (SQLException ex) {
@@ -388,7 +405,7 @@ class SQLAPI {
             customer.setCustomerName(customerName);
             customer.setActive(active);
             customer.setAddressId(address.getAddressId());
-            
+
             stmt.executeUpdate("UPDATE customer " +
                     "SET customerName = \"" + customerName +
                     "\", addressId = \"" + address.getAddressId() +
@@ -402,12 +419,13 @@ class SQLAPI {
     }
 
     public void updateAppointment(ORMAppointment appointment,
-            ORMCustomer customer, String title, String description,
-            String location, String contact, String url, LocalDateTime start, 
+            ORMCustomer customer, String title, String type, String description,
+            String location, String contact, String url, LocalDateTime start,
             LocalDateTime end, String user) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         appointment.setCustomerId(customer.getCustomerId());
         appointment.setTitle(title);
+        appointment.setType(type);
         appointment.setDescription(description);
         appointment.setLocation(location);
         appointment.setContact(contact);
@@ -417,9 +435,10 @@ class SQLAPI {
 
         try {
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE appointment " + 
+            stmt.executeUpdate("UPDATE appointment " +
                 "SET customerId = " + Integer.toString(customer.getCustomerId()) +
-                ", title = \"" + title + 
+                ", title = \"" + title +
+                "\", type = \"" + type +
                 "\", description = \"" + description +
                 "\", location = \"" + location +
                 "\", contact = \"" + contact +
@@ -427,7 +446,7 @@ class SQLAPI {
                 "\", start = \"" + start.format(formatter) +
                 "\", end = \"" + end.format(formatter) +
                 "\", lastUpdateBy = \"" + user + "\" " +
-                "WHERE appointmentId = " + 
+                "WHERE appointmentId = " +
                 Integer.toString(appointment.getAppointmentId()));
         } catch (SQLException ex) {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
@@ -435,38 +454,41 @@ class SQLAPI {
     }
 
     public ORMAppointment insertAppointment(ORMCustomer customer, String title,
-            String description, String location, String contact, String url,
+        String type, String description, String location, String contact,
+        String url,
             LocalDateTime start, LocalDateTime end, String user) {
         int maxId = Collections.max(appointmentsById.keySet());
-        
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         try {
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("INSERT INTO appointment " + 
-                "(appointmentId, customerId, title, description, location, " +
-                "contact, url, start, end, createDate, createdBy, lastUpdateBy) " +
-                String.format("values (%1$d, %2$d, \"%3$s\", \"%4$s\"," +
-                              " \"%5$s\", \"%6$s\", \"%7$s\",  \"%8$s\", " +
-                              "\"%9$s\", NOW(), \"%10$s\", \"%10$s\")", 
-                              maxId + 1, customer.getCustomerId(), title, 
-                              description, location, contact, url, 
+            stmt.executeUpdate("INSERT INTO appointment " +
+                "(appointmentId, customerId, title, type, description, " +
+                "location, contact, url, start, end, " +
+                "createDate, createdBy, lastUpdateBy) " +
+                String.format("values (%1$d, %2$d, \"%3$s\", \"%4$s\", \"%5$s\"," +
+                              " \"%6$s\", \"%7$s\", \"%8$s\",  \"%9$s\", " +
+                              "\"%10$s\", NOW(), \"%11$s\", \"%11$s\")",
+                              maxId + 1, customer.getCustomerId(), title, type,
+                              description, location, contact, url,
                               start.format(formatter), end.format(formatter),
                               user));
         } catch (SQLException ex) {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
         }
-        
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("select * from appointment" +
                     " where appointmentId=" + Integer.toString(maxId + 1));
-            
+
             rs.next();
             ORMAppointment appointment = new ORMAppointment(
                 rs.getInt("appointmentId"),
                 rs.getInt("customerId"),
                 rs.getString("title"),
+                rs.getString("type"),
                 rs.getString("description"),
                 rs.getString("location"),
                 rs.getString("contact"),
@@ -505,7 +527,7 @@ class SQLAPI {
     public ORMCity getCityById(int cityId) {
         return cities.get(cityId);
     }
-    
+
     public ORMCustomer getCustomerById(int customerId) {
         return customers.get(customerId);
     }
@@ -526,6 +548,28 @@ class SQLAPI {
         }
     }
 
+    public boolean doesAppointmentExistInWindow(LocalDateTime windowStart,
+            LocalDateTime windowEnd) {
+
+        // check only one week for better Big-O
+        SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
+            windowStart.getYear(),
+            windowStart.get(woy));
+
+        for (ORMAppointment a : appointmentsByYearWeek.get(yearWeekEntry)) {
+            if ((a.getStart().isAfter(windowStart) &&
+                 a.getStart().isBefore(windowEnd)) ||
+                (a.getEnd().isAfter(windowStart) &&
+                 a.getEnd().isBefore(windowEnd)) ||
+                (a.getStart().isAfter(windowStart) &&
+                 a.getEnd().isBefore(windowEnd))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void deleteAppointment(ORMAppointment appointment) {
         appointmentsById.remove(appointment.getAppointmentId());
 
@@ -538,8 +582,8 @@ class SQLAPI {
         try {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("DELETE FROM appointment " +
-                    "WHERE appointmentId = " + Integer.toString(appointment.getAppointmentId())
-            );
+                "WHERE appointmentId = " +
+                Integer.toString(appointment.getAppointmentId()));
         } catch (SQLException ex) {
             System.out.println("SQL update error: " + ex.getMessage());
         }

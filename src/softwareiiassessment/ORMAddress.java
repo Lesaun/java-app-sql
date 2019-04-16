@@ -16,8 +16,8 @@ public class ORMAddress {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    ORMAddress(int addressId, String address, String address2, int cityId, 
-            String postalCode, String phone, String createDate, 
+    ORMAddress(int addressId, String address, String address2, int cityId,
+            String postalCode, String phone, String createDate,
             String createdBy, int lastUpdate, String lastUpdateBy) {
         this.addressId = new SimpleIntegerProperty(addressId);
         this.address = new SimpleStringProperty(address);
@@ -25,13 +25,13 @@ public class ORMAddress {
         this.cityId = new SimpleIntegerProperty(cityId);
         this.postalCode = new SimpleStringProperty(postalCode);
         this.phone = new SimpleStringProperty(phone);
-        
+
         this.createDate = new SimpleStringProperty(createDate);
         this.createdBy = new SimpleStringProperty(createdBy);
         this.lastUpdate = new SimpleIntegerProperty(lastUpdate);
         this.lastUpdateBy = new SimpleStringProperty(lastUpdateBy);
     }
- 
+
     public int getAddressId() {
         return addressId.get();
     }
@@ -63,7 +63,7 @@ public class ORMAddress {
     public void setCityId(int cityId) {
         this.cityId.set(cityId);
     }
-    
+
     public String getPostalCode() {
         return postalCode.get();
     }
@@ -71,7 +71,7 @@ public class ORMAddress {
     public void setPostalCode(String postalCode) {
         this.postalCode.set(postalCode);
     }
-    
+
     public String getPhone() {
         return phone.get();
     }
@@ -79,7 +79,7 @@ public class ORMAddress {
     public void setPhone(String phone) {
         this.phone.set(phone);
     }
-    
+
     public String getCreateDate() {
         return createDate.get();
     }
@@ -112,5 +112,3 @@ public class ORMAddress {
         this.lastUpdateBy.set(lastUpdateBy);
     }
 }
-        
-

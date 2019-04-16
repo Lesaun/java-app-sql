@@ -1,5 +1,7 @@
 package softwareiiassessment;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,50 +16,42 @@ import javafx.scene.text.Text;
 
 
 public class PaneSelectAddress extends GridPane {
-    private final Button selBtn;
-    private final Button canBtn;
+    private final Text headerText = new Text("Select Address");
+    private final Button selBtn = new Button("Select");
+    private final Button canBtn = new Button("Cancel");
     private TableView<ORMAddress> tableView = new TableView<>();
 
     PaneSelectAddress(SQLAPI api) {
-       
-        // Constuct delete button
-        this.canBtn = new Button();
-        this.canBtn.setText("Cancel");
-        this.canBtn.setPrefWidth(71);        
-        
-        // Constuct delete button
-        this.selBtn = new Button();
-        this.selBtn.setText("Select");
-        this.selBtn.setPrefWidth(71);          
+
+        // Set button widths
+        this.canBtn.setPrefWidth(71);
+        this.selBtn.setPrefWidth(71);
 
         // Add width constraint for columns
-        ColumnConstraints leftMarginCol = new ColumnConstraints(15);
-        this.getColumnConstraints().add(leftMarginCol);
-
-        for (int i = 0; i < 19; i++) {
-            ColumnConstraints column = new ColumnConstraints(29);//29);
-            this.getColumnConstraints().add(column);    
+        ArrayList<Integer> colWidths = new ArrayList<>();
+        colWidths.add(15);
+        colWidths.addAll(Collections.nCopies(19, 29));
+        colWidths.add(15);
+        for (int colWidth : colWidths) {
+            ColumnConstraints column = new ColumnConstraints(colWidth);
+            getColumnConstraints().add(column);
         }
 
-        ColumnConstraints rightMarginCol = new ColumnConstraints(15);
-        this.getColumnConstraints().add(rightMarginCol);
-        
-        
         // Add height constraint for rows
-        for (int row_height : new int[]{15, 23, 6, 160, 6, 26, 24}) {
-            RowConstraints row = new RowConstraints(row_height);
+        for (int rowHeight : new int[]{15, 23, 6, 160, 6, 26, 24}) {
+            RowConstraints row = new RowConstraints(rowHeight);
             this.getRowConstraints().add(row);
         }
-        
+
         constructTableView(api);
 
         // Add items to grid
-        this.add(new Text("Cities"), 1, 1, 3, 1);
-        this.add(this.tableView, 1, 3, 19, 1);
-        this.add(this.canBtn, 14, 5, 3, 1);
-        this.add(this.selBtn, 17, 5, 3, 1);
+        this.add(headerText, 1, 1, 3, 1);
+        this.add(tableView, 1, 3, 19, 1);
+        this.add(canBtn, 14, 5, 3, 1);
+        this.add(selBtn, 17, 5, 3, 1);
     }
-    
+
     private void constructTableView(SQLAPI api) {
 
         TableColumn address1Col = new TableColumn("Address 1");

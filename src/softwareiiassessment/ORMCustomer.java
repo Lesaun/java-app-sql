@@ -15,20 +15,21 @@ public class ORMCustomer {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    ORMCustomer(int customerId, String customerName, int addressId, boolean active,
-        String createDate, String createdBy, int lastUpdate, String lastUpdateBy) {
+    ORMCustomer(int customerId, String customerName, int addressId,
+                boolean active, String createDate, String createdBy,
+                int lastUpdate, String lastUpdateBy) {
         this.customerId = new SimpleIntegerProperty(customerId);
         this.customerName = new SimpleStringProperty(customerName);
         this.addressId = new SimpleIntegerProperty(addressId);
         this.active = new SimpleBooleanProperty(active);
-        
+
         this.createDate = new SimpleStringProperty(createDate);
         this.createdBy = new SimpleStringProperty(createdBy);
         this.lastUpdate = new SimpleIntegerProperty(lastUpdate);
         this.lastUpdateBy = new SimpleStringProperty(lastUpdateBy);
     }
- 
-    
+
+
     public int getCustomerId() {
         return customerId.get();
     }
@@ -93,4 +94,3 @@ public class ORMCustomer {
         this.lastUpdateBy.set(lastUpdateBy);
     }
 }
-        
