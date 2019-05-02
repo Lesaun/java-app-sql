@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package softwareiiassessment;
 
 import java.sql.DriverManager;
@@ -11,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
@@ -42,6 +38,7 @@ class SQLAPI {
     private HashMap<Integer, ORMAddress> addresses;
     private HashMap<Integer, ORMCustomer> customers;
     private HashMap<Integer, ORMAppointment> appointmentsById;
+    private ObservableList<ORMUser> users; 
     private HashMap<SimpleImmutableEntry<Integer, Integer>,
         ArrayList<ORMAppointment>> appointmentsByYearWeek;
 
@@ -82,6 +79,7 @@ class SQLAPI {
         loadAddressesIntoMemory();
         loadCustomersIntoMemory();
         loadAppointmentsIntoMemory();
+        loadUsersIntoMemory();
     }
 
     private void loadCitiesIntoMemory() {
@@ -190,6 +188,7 @@ class SQLAPI {
                 ORMAppointment appointment = new ORMAppointment(
                     rs.getInt("appointmentId"),
                     rs.getInt("customerId"),
+                    rs.getInt("userId"),
                     rs.getString("title"),
                     rs.getString("type"),
                     rs.getString("description"),
@@ -219,6 +218,25 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    private void loadUsersIntoMemory() {
+        ResultSet rs = runSQLCommand("select * from user;");
+        users = FXCollections.observableArrayList();
+
+
+        try {
+            while (rs.next()) {
+                ORMUser user = new ORMUser(
+                    rs.getInt("userId"),
+                    rs.getString("userName")
+                );
+
+                users.add(user);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public boolean isUsernamePasswordValid(String username, String password) {
         ResultSet rs = runSQLCommand("select * from user where " +
@@ -235,6 +253,25 @@ class SQLAPI {
         }
 
         return false;
+    }
+    
+    public ObservableList<ORMUser> getUsers() {
+        return users;
+    }
+    
+    public ORMUser getUserByName(String username) {
+        ResultSet rs = runSQLCommand("select * from user where " +
+                       "lower(userName) = \"" + username.toLowerCase() + "\";");
+
+        try {
+            while (rs.next()) {
+                return new ORMUser(rs.getInt("userId"), rs.getString("username"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
     }
 
     public ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
@@ -419,11 +456,12 @@ class SQLAPI {
     }
 
     public void updateAppointment(ORMAppointment appointment,
-            ORMCustomer customer, String title, String type, String description,
+            ORMCustomer customer, ORMUser user, String title, String type, String description,
             String location, String contact, String url, LocalDateTime start,
-            LocalDateTime end, String user) {
+            LocalDateTime end, ORMUser updateUser) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         appointment.setCustomerId(customer.getCustomerId());
+        appointment.setUserId(user.getUserId());
         appointment.setTitle(title);
         appointment.setType(type);
         appointment.setDescription(description);
@@ -437,6 +475,7 @@ class SQLAPI {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("UPDATE appointment " +
                 "SET customerId = " + Integer.toString(customer.getCustomerId()) +
+                ", userId = " + user.getUserId() +
                 ", title = \"" + title +
                 "\", type = \"" + type +
                 "\", description = \"" + description +
@@ -445,18 +484,100 @@ class SQLAPI {
                 "\", url = \"" + url +
                 "\", start = \"" + start.format(formatter) +
                 "\", end = \"" + end.format(formatter) +
-                "\", lastUpdateBy = \"" + user + "\" " +
+                "\", lastUpdateBy = \"" + updateUser.getUserName() + "\" " +
                 "WHERE appointmentId = " +
                 Integer.toString(appointment.getAppointmentId()));
         } catch (SQLException ex) {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
         }
     }
+    
+    public String appointmentTypesByMonthReport() {
+        String retVal = "";
+       
+        try {        
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from appointment ORDER BY start ASC");            
+            HashMap<String, Integer> monthsTypeCounts = new HashMap<>();
+            Month lastMonth = null;
+            
+            while (rs.next()) {
+                Month month =  rs.getTimestamp("start").toLocalDateTime().getMonth();
+                
+                if (!month.equals(lastMonth)) {
+                    for (String type : monthsTypeCounts.keySet()) {
+                        retVal += (type == null ? "None" : type) + ": " +
+                                monthsTypeCounts.get(type) + "\n";
+                    }
+                    retVal += "\n\n" + month.toString() + " " + Integer.toString(
+                        rs.getTimestamp("start").toLocalDateTime().getYear()) + "\n";
+                    monthsTypeCounts = new HashMap<>();
+                    lastMonth = month;
+                }
 
-    public ORMAppointment insertAppointment(ORMCustomer customer, String title,
+                if (monthsTypeCounts.containsKey(rs.getString("type"))) {
+                    monthsTypeCounts.put(rs.getString("type"),
+                        monthsTypeCounts.get(rs.getString("type")) + 1);
+                } else {
+                    monthsTypeCounts.put(rs.getString("type"), 1);
+                }
+            }
+            
+            for (String type : monthsTypeCounts.keySet()) {
+                retVal += (type == null ? "None" : type) + ": " +
+                        monthsTypeCounts.get(type) + "\n";
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return retVal;
+    }
+
+    public String numberOfAppointmentsByCustomer() {
+        String retVal = "";
+       
+        try {        
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from appointment ORDER BY start ASC");            
+            HashMap<Integer, Integer> customersTypeCounts = new HashMap<>();
+            Month lastMonth = null;
+            
+            while (rs.next()) {              
+                for (int customerId : customersTypeCounts.keySet()) {
+                    retVal += customerId + ": " +
+                            customersTypeCounts.get(customerId) + "\n";
+                }
+                retVal += "\n\n" + month.toString() + " " + Integer.toString(
+                    rs.getTimestamp("start").toLocalDateTime().getYear()) + "\n";
+                customersTypeCounts = new HashMap<>();
+                lastMonth = month;
+                
+
+                if (customersTypeCounts.containsKey(rs.getString("type"))) {
+                    customersTypeCounts.put(rs.getString("type"),
+                        customersTypeCounts.get(rs.getString("type")) + 1);
+                } else {
+                    customersTypeCounts.put(rs.getString("type"), 1);
+                }
+            }
+            
+            for (String type : customersTypeCounts.keySet()) {
+                retVal += (type == null ? "None" : type) + ": " +
+                        customersTypeCounts.get(type) + "\n";
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return retVal;
+    }
+    
+    public ORMAppointment insertAppointment(ORMCustomer customer, ORMUser user,
+            String title,
         String type, String description, String location, String contact,
         String url,
-            LocalDateTime start, LocalDateTime end, String user) {
+            LocalDateTime start, LocalDateTime end, ORMUser updateUser) {
         int maxId = Collections.max(appointmentsById.keySet());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -466,14 +587,14 @@ class SQLAPI {
             stmt.executeUpdate("INSERT INTO appointment " +
                 "(appointmentId, customerId, title, type, description, " +
                 "location, contact, url, start, end, " +
-                "createDate, createdBy, lastUpdateBy) " +
+                "createDate, createdBy, lastUpdateBy, userId) " +
                 String.format("values (%1$d, %2$d, \"%3$s\", \"%4$s\", \"%5$s\"," +
                               " \"%6$s\", \"%7$s\", \"%8$s\",  \"%9$s\", " +
-                              "\"%10$s\", NOW(), \"%11$s\", \"%11$s\")",
+                              "\"%10$s\", NOW(), \"%11$s\", \"%11$s\", %12$d)",
                               maxId + 1, customer.getCustomerId(), title, type,
                               description, location, contact, url,
                               start.format(formatter), end.format(formatter),
-                              user));
+                              updateUser.getUserName(), user.getUserId()));
         } catch (SQLException ex) {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
         }
@@ -487,6 +608,7 @@ class SQLAPI {
             ORMAppointment appointment = new ORMAppointment(
                 rs.getInt("appointmentId"),
                 rs.getInt("customerId"),
+                rs.getInt("userId"),
                 rs.getString("title"),
                 rs.getString("type"),
                 rs.getString("description"),
@@ -535,6 +657,15 @@ class SQLAPI {
     public ORMAddress getAddressById(int addressId) {
         return addresses.get(addressId);
     }
+    
+    public ORMUser getUserById(int userId) {
+        for (ORMUser user : users) {
+            if (user.getUserId() == userId) {
+                return user;
+            }
+        }
+        return null;
+    }
 
     public void deleteCustomer(ORMCustomer selectedCustomer) {
         customers.remove(selectedCustomer.getCustomerId());
@@ -556,14 +687,34 @@ class SQLAPI {
             windowStart.getYear(),
             windowStart.get(woy));
 
-        for (ORMAppointment a : appointmentsByYearWeek.get(yearWeekEntry)) {
-            if ((a.getStart().isAfter(windowStart) &&
-                 a.getStart().isBefore(windowEnd)) ||
-                (a.getEnd().isAfter(windowStart) &&
-                 a.getEnd().isBefore(windowEnd)) ||
-                (a.getStart().isAfter(windowStart) &&
-                 a.getEnd().isBefore(windowEnd))) {
-                return true;
+
+        if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+            for (ORMAppointment a : appointmentsByYearWeek.get(yearWeekEntry)) {
+                if ((a.getStart().isAfter(windowStart) &&
+                     a.getStart().isBefore(windowEnd)) ||
+                    (a.getEnd().isAfter(windowStart) &&
+                     a.getEnd().isBefore(windowEnd)) ||
+                    (a.getStart().isAfter(windowStart) &&
+                     a.getEnd().isBefore(windowEnd))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isAppointmentWithin15Min(LocalDateTime nowInUTC) {
+        SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
+            nowInUTC.getYear(),
+            nowInUTC.get(woy));
+
+        if (appointmentsByYearWeek.containsKey(yearWeekEntry)) {
+            for (ORMAppointment a : appointmentsByYearWeek.get(yearWeekEntry)) {
+                if (a.getStart().minusMinutes(15).isBefore(nowInUTC) &&
+                    a.getStart().isAfter(nowInUTC)) {
+                    return true;
+                }
             }
         }
 

@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 public class ORMAppointment {
     private final SimpleIntegerProperty appointmentId;
     private final SimpleIntegerProperty customerId;
+    private final SimpleIntegerProperty userId;
     private final SimpleStringProperty title;
     private final SimpleStringProperty type;
     private final SimpleStringProperty description;
@@ -22,12 +23,13 @@ public class ORMAppointment {
     private final SimpleIntegerProperty lastUpdate;
     private final SimpleStringProperty lastUpdateBy;
 
-    ORMAppointment(int appointmentId, int customerId, String title, String type,
+    ORMAppointment(int appointmentId, int customerId, int userId, String title, String type,
             String description, String location, String contact, String url,
             LocalDateTime start, LocalDateTime end, String createDate,
             String createdBy, int lastUpdate, String lastUpdateBy) {
         this.appointmentId = new SimpleIntegerProperty(appointmentId);
         this.customerId = new SimpleIntegerProperty(customerId);
+        this.userId = new SimpleIntegerProperty(userId);
         this.title = new SimpleStringProperty(title);
         this.type = new SimpleStringProperty(type);
         this.description = new SimpleStringProperty(description);
@@ -73,6 +75,15 @@ public class ORMAppointment {
 
     public void setLastUpdate(int lastUpdate) {
         this.lastUpdate.set(lastUpdate);
+    }
+    
+
+    public int getUserId() {
+        return userId.get();
+    }
+
+    public void setUserId(int userId) {
+        this.userId.set(userId);
     }
 
     public String getLastUpdateBy() {

@@ -2,6 +2,10 @@ package softwareiiassessment;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
@@ -25,7 +29,8 @@ import javafx.scene.text.Text;
 
 
 public class PaneCalendar extends GridPane {
-    private TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
+    private TemporalField woy =
+        WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
 
     private final Text headerText = new Text("Calendar");
     private final RadioButton weekRadio = new RadioButton("Week");
@@ -40,6 +45,7 @@ public class PaneCalendar extends GridPane {
     private final Button calNext = new Button(">");
 
     private final Button manageCustomersBtn = new Button("Manage Customers");
+    private final Button reportsBtn = new Button("Reports");
 
     private final Button addBtn = new Button("Add");
     private final Button modBtn = new Button("Modify");
@@ -78,8 +84,8 @@ public class PaneCalendar extends GridPane {
                 currentDate = currentDate.minusDays(7);
                 setTableViewToWeekOfYear(currentDate.get(woy),
                                          currentDate.getYear());
-                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
-                " - " +
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY)
+                                    .toLocalDate().toString() + " - " +
                 currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
                 currentDate = currentDate.minusMonths(1);
@@ -95,8 +101,8 @@ public class PaneCalendar extends GridPane {
                 currentDate = currentDate.plusDays(7);
                 setTableViewToWeekOfYear(currentDate.get(woy),
                                          currentDate.getYear());
-                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
-                " - " +
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY)
+                                    .toLocalDate().toString() + " - " +
                 currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
                 currentDate = currentDate.plusMonths(1);
@@ -107,13 +113,13 @@ public class PaneCalendar extends GridPane {
             }
         });
 
-        radioGroup.selectedToggleProperty().addListener((ov, ot, new_toggle) -> {
-            RadioButton selectedBtn = (RadioButton) new_toggle;
+        radioGroup.selectedToggleProperty().addListener((ov, ot, newToggle) -> {
+            RadioButton selectedBtn = (RadioButton) newToggle;
             if (selectedBtn.getId().equals("week")) {
                 setTableViewToWeekOfYear(currentDate.get(woy),
                                          currentDate.getYear());
-                calLocation.setText(currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
-                " - " +
+                calLocation.setText(currentDate.with(DayOfWeek.MONDAY)
+                                    .toLocalDate().toString() + " - " +
                 currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
             } else {
                 setTableViewToMonthOfYear(currentDate.getMonthValue(),
@@ -147,6 +153,7 @@ public class PaneCalendar extends GridPane {
         add(calNext, 25, 3, 2, 1);
         add(tableView, 1, 5, 25, 1);
         add(manageCustomersBtn, 1, 7, 5, 1);
+        add(reportsBtn, 6, 7, 5, 1);
         add(addBtn, 13, 7, 3, 1);
         add(modBtn, 16, 7, 3, 1);
         add(delBtn, 19, 7, 3, 1);
@@ -168,9 +175,17 @@ public class PaneCalendar extends GridPane {
         TableColumn locationCol = new TableColumn("Location");
         locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
 
-        TableColumn<ORMAppointment, String> startCol = new TableColumn("Start Time");
-        startCol.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getStart().toString()));
+        TableColumn<ORMAppointment, String> startCol = new TableColumn("Local Start Time");
+        startCol.setCellValueFactory(data -> {
+            ZonedDateTime utcTime = data.getValue().getStart()
+                                                   .atZone(ZoneId.of("UTC"));
+            ZonedDateTime localTime = utcTime.withZoneSameInstant(
+                                                        ZoneId.systemDefault());
+            String formattedTime = localTime.format(
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+
+            return new SimpleStringProperty(formattedTime);
+        });
 
         tableView.getColumns().addAll(titleCol, typeCol, contactCol,
                                       locationCol, startCol);
@@ -219,6 +234,10 @@ public class PaneCalendar extends GridPane {
 
     public final void setLogoutBtnEvent(EventHandler<ActionEvent> handler) {
         this.logBtn.setOnAction(handler);
+    }
+    
+    public final void setReportsBtnEvent(EventHandler<ActionEvent> handler) {
+        this.reportsBtn.setOnAction(handler);
     }
 
     public final void setCustomerManagerBtnEvent(EventHandler<ActionEvent> handler) {

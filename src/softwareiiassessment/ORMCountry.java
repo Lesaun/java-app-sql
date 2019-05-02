@@ -28,7 +28,7 @@ public class ORMCountry {
         return countryId.get();
     }
 
-    public void getCountryId(int countryId) {
+    public void setCountryId(int countryId) {
         this.countryId.set(countryId);
     }
 

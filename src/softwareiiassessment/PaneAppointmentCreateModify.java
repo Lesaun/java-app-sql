@@ -3,6 +3,8 @@ package softwareiiassessment;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +24,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.util.StringConverter;
 
 
 public class PaneAppointmentCreateModify extends GridPane {
@@ -31,6 +34,8 @@ public class PaneAppointmentCreateModify extends GridPane {
     private final TextField idTextField = new TextField();
     private final Text titlePrompt = new Text("Title");
     private final TextField title = new TextField();
+    private final Text userPrompt = new Text("User");
+    private final ComboBox<ORMUser> userDropDown = new ComboBox<>();
     private final Text typePrompt = new Text("Type");
     private final TextField type = new TextField();
     private final Text descriptionPrompt = new Text("Description");
@@ -109,6 +114,19 @@ public class PaneAppointmentCreateModify extends GridPane {
                     ti);
         });
 
+        userDropDown.setItems(api.getUsers());
+        userDropDown.setConverter(new StringConverter<ORMUser>() {
+            @Override
+            public String toString(ORMUser user) {
+                return user.getUserName();
+            }
+
+            @Override
+            public ORMUser fromString(String string) {
+                return userDropDown.getItems().stream().filter(ap ->
+                    ap.getUserName().equals(string)).findFirst().orElse(null);
+            }
+        });
 
         // Add width constraint for columns
         for (int colWidth : new int[]{15,50,50,50,50,50,50,50,50,50,15}) {
@@ -119,7 +137,7 @@ public class PaneAppointmentCreateModify extends GridPane {
         // Add height constraint for row
         ArrayList<Integer> rowHeights = new ArrayList<>();
         rowHeights.add(15);
-        rowHeights.addAll(Collections.nCopies(20, 30));
+        rowHeights.addAll(Collections.nCopies(21, 30));
         rowHeights.add(15);
 
         for (Integer rowHeight : rowHeights) {
@@ -133,30 +151,32 @@ public class PaneAppointmentCreateModify extends GridPane {
         add(idTextField, 4, 2, 3, 1);
         add(titlePrompt, 2, 3, 1, 1);
         add(title, 4, 3, 3, 1);
-        add(typePrompt, 2, 4, 1, 1);
-        add(type, 4, 4, 3, 1);
-        add(customerPrompt, 2, 5, 1, 1);
-        add(selectBtn, 4, 5, 1, 1);
-        add(customerName, 2, 6, 1, 1);
-        add(descriptionPrompt, 2, 7, 1, 1);
-        add(description, 2, 8, 5, 2);
-        add(locationPrompt, 2, 10, 1, 1);
-        add(location, 2, 11, 5, 2);
-        add(contactPrompt, 2, 13, 3, 1);
-        add(contact, 2, 14, 5, 2);
-        add(startDPrompt, 2, 16, 1, 1);
-        add(startDate, 4, 16, 3, 1);
-        add(startTPrompt, 2, 17, 1, 1);
-        add(startHour, 4, 17, 2, 1);
-        add(startMinute, 6, 17, 2, 1);
-        add(endTPrompt, 2, 18, 1, 1);
-        add(endHour, 4, 18, 2, 1);
-        add(endMinute, 6, 18, 2, 1);
-        add(urlPrompt, 2, 19, 1, 1);
-        add(url, 4, 19, 3, 1);
-        add(errorText, 2, 20, 2, 1);
-        add(saveBtn, 6, 20, 2, 1);
-        add(cancelBtn, 8, 20, 2, 1);
+        add(userPrompt, 2, 4, 1, 1);
+        add(userDropDown, 4, 4, 3, 1);
+        add(typePrompt, 2, 5, 1, 1);
+        add(type, 4, 5, 3, 1);
+        add(customerPrompt, 2, 6, 1, 1);
+        add(selectBtn, 4, 6, 1, 1);
+        add(customerName, 2, 7, 1, 1);
+        add(descriptionPrompt, 2, 8, 1, 1);
+        add(description, 2, 9, 5, 2);
+        add(locationPrompt, 2, 11, 1, 1);
+        add(location, 2, 12, 5, 2);
+        add(contactPrompt, 2, 14, 3, 1);
+        add(contact, 2, 15, 5, 2);
+        add(startDPrompt, 2, 17, 1, 1);
+        add(startDate, 4, 17, 3, 1);
+        add(startTPrompt, 2, 18, 1, 1);
+        add(startHour, 4, 18, 2, 1);
+        add(startMinute, 6, 18, 2, 1);
+        add(endTPrompt, 2, 19, 1, 1);
+        add(endHour, 4, 19, 2, 1);
+        add(endMinute, 6, 19, 2, 1);
+        add(urlPrompt, 2, 20, 1, 1);
+        add(url, 4, 20, 3, 1);
+        add(errorText, 2, 21, 2, 1);
+        add(saveBtn, 6, 21, 2, 1);
+        add(cancelBtn, 8, 21, 2, 1);
     }
 
     private void setEndLowTime(String start_hour, String start_minute,
@@ -200,7 +220,7 @@ public class PaneAppointmentCreateModify extends GridPane {
                         .collect(Collectors.toList())));
         }
     }
-
+    
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selectBtn.setOnAction(handler);
     }
@@ -284,6 +304,14 @@ public class PaneAppointmentCreateModify extends GridPane {
     public void setUrl(String url) {
         this.url.setText(url);
     }
+    
+    public ORMUser getUser() {
+        return userDropDown.getSelectionModel().getSelectedItem();
+    }
+    
+    public void setUser(ORMUser user) {
+        this.userDropDown.setValue(user);
+    }
 
     public LocalDateTime getStart() {
         LocalDate startDateOnly = startDate.getValue();
@@ -297,27 +325,31 @@ public class PaneAppointmentCreateModify extends GridPane {
 
         return startDateOnly.atTime(shour,
                Integer.parseInt(startMinute.getValue()),
-               00);
+               00).atZone(ZoneId.systemDefault())
+               .withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
     }
 
     public void setStart(LocalDateTime start) {
-        startDate.setValue(start.toLocalDate());
+        LocalDateTime localStart = start.atZone(ZoneId.of("UTC"))
+                 .withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+        
+        startDate.setValue(localStart.toLocalDate());
         String hour;
 
-        if (start.getHour() < 12) {
-            if (start.getHour() < 10) {
-                hour = String.format("0%dam", start.getHour());
+        if (localStart.getHour() < 12) {
+            if (localStart.getHour() < 10) {
+                hour = String.format("0%dam", localStart.getHour());
             } else {
-                hour = String.format("%dam", start.getHour());
+                hour = String.format("%dam", localStart.getHour());
             }
-        } else if (start.getHour() == 12) {
-            hour = String.format("%dam", start.getHour());
+        } else if (localStart.getHour() == 12) {
+            hour = String.format("%dam", localStart.getHour());
         } else {
-            hour = String.format("%dpm", start.getHour() - 12);
+            hour = String.format("%dpm", localStart.getHour() - 12);
         }
 
         startHour.setValue(hour);
-        startMinute.setValue(String.format("%02d", start.getMinute()));
+        startMinute.setValue(String.format("%02d", localStart.getMinute()));
     }
 
     public LocalDateTime getEnd() {
@@ -332,26 +364,29 @@ public class PaneAppointmentCreateModify extends GridPane {
 
         return startDateOnly.atTime(ehour,
                Integer.parseInt(endMinute.getValue()),
-               00);
+               00).atZone(ZoneId.systemDefault())
+               .withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
     }
 
     public void setEnd(LocalDateTime end) {
+        LocalDateTime localEnd = end.atZone(ZoneId.of("UTC"))
+                 .withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
         String hour;
 
-        if (end.getHour() < 12) {
-            if (end.getHour() < 10) {
-                hour = String.format("0%dam", end.getHour());
+        if (localEnd.getHour() < 12) {
+            if (localEnd.getHour() < 10) {
+                hour = String.format("0%dam", localEnd.getHour());
             } else {
-                hour = String.format("%dam", end.getHour());
+                hour = String.format("%dam", localEnd.getHour());
             }
-        } else if (end.getHour() == 12) {
-            hour = String.format("%dam", end.getHour());
+        } else if (localEnd.getHour() == 12) {
+            hour = String.format("%dam", localEnd.getHour());
         } else {
-            hour = String.format("0%dpm", end.getHour() - 12);
+            hour = String.format("0%dpm", localEnd.getHour() - 12);
         }
 
         endHour.setValue(hour);
-        endMinute.setValue(String.format("%02d", end.getMinute()));
+        endMinute.setValue(String.format("%02d", localEnd.getMinute()));
     }
 
     public boolean isCustomerSelected() {

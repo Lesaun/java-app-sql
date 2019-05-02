@@ -22,7 +22,8 @@ public class PaneLogin extends GridPane {
     private final TextField usernameField = new TextField();
     private final Text passwordPrompt = new Text("Password");
     private final PasswordField passwordField = new PasswordField();
-    private final Text failedLoginText = new Text("The username and password did not match.");
+    private final Text failedLoginText = new Text("The username and " +
+                                                  "password did not match.");
 
     private final Button loginBtn = new Button("Login");
     private final Button exitBtn = new Button("Exit");
@@ -51,14 +52,27 @@ public class PaneLogin extends GridPane {
         add(failedLoginText, 2, 4, 4, 1);
         add(loginBtn, 6, 5, 2, 1);
         add(exitBtn, 8, 5, 2, 1);
-
-        setGridLinesVisible(true);
     }
 
     public void setLocale(Locale locale) {
-        String lang = locale.getDisplayLanguage();
-
-        System.out.println(lang);
+        if (locale.equals(Locale.FRANCE) || locale.equals(Locale.FRENCH)) {
+            headerText.setText("Connexion");
+            usernamePrompt.setText("Nom d'utilisateur");
+            passwordPrompt.setText("Mot de passe");
+            failedLoginText.setText("Le nom d'utilisateur et le mot de passe " +
+                                    " ne correspondent pas");
+            loginBtn.setText("Connexion");
+            exitBtn.setText("Sortie");
+        } else if (locale.equals(Locale.ITALIAN) ||
+                   locale.equals(Locale.ITALY)) {
+            headerText.setText("Acciedi");
+            usernamePrompt.setText("Nome utente");
+            passwordPrompt.setText("Password");
+            failedLoginText.setText("Il nome utente e la password non " +
+                                    "corrispondevano.");
+            loginBtn.setText("Acciedi");
+            exitBtn.setText("Uscita");
+        }
     }
 
     public final void setLoginBtnEvent(EventHandler<ActionEvent> handler) {
