@@ -25,6 +25,11 @@ import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * API for SQL database
+ *
+ * @author Lesaun
+ */
 class SQLAPI {
     private Connection conn;
     //mysql -u U05nwl -p53688557025 -h 52.206.157.109 -D U05nwl
@@ -50,7 +55,13 @@ class SQLAPI {
         loadDBIntoMemory();
     }
 
-    public ResultSet runSQLCommand(String commandToExecute) {
+    /**
+     * Run sql query command
+     * 
+     * @param commandToExecute command to execute
+     * @return command result set
+     */
+    public ResultSet runSQLQueryCommand(String commandToExecute) {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(commandToExecute);
@@ -61,6 +72,9 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Initiate with SQL connection
+     */
     private void initConnection() {
         try {
             Class.forName(DRIVER);
@@ -76,6 +90,9 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Load database into memory
+     */
     private void loadDBIntoMemory() {
         loadCountiesIntoMemory();
         loadCitiesIntoMemory();
@@ -85,8 +102,11 @@ class SQLAPI {
         loadUsersIntoMemory();
     }
 
+    /**
+     * Load cities into memory
+     */
     private void loadCitiesIntoMemory() {
-        ResultSet rs = runSQLCommand("SELECT * FROM city;");
+        ResultSet rs = runSQLQueryCommand("SELECT * FROM city;");
         cities = new HashMap<>();
 
         try {
@@ -109,8 +129,11 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Load countries into memory
+     */
     private void loadCountiesIntoMemory() {
-        ResultSet rs = runSQLCommand("select * from country;");
+        ResultSet rs = runSQLQueryCommand("select * from country;");
         countries = new HashMap<>();
 
         try {
@@ -131,8 +154,11 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Load addresses into memory
+     */
     private void loadAddressesIntoMemory() {
-        ResultSet rs = runSQLCommand("select * from address;");
+        ResultSet rs = runSQLQueryCommand("select * from address;");
         addresses = new HashMap<>();
 
         try {
@@ -156,9 +182,12 @@ class SQLAPI {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
+    /**
+     * Load customers into memory
+     */
     private void loadCustomersIntoMemory() {
-        ResultSet rs = runSQLCommand("select * from customer;");
+        ResultSet rs = runSQLQueryCommand("select * from customer;");
         customers = new HashMap<>();
 
         try {
@@ -181,8 +210,11 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Load appointments into memory
+     */
     private void loadAppointmentsIntoMemory() {
-        ResultSet rs = runSQLCommand("select * from appointment;");
+        ResultSet rs = runSQLQueryCommand("select * from appointment;");
         appointmentsById = new HashMap<>();
         appointmentsByYearWeek = new HashMap<>();
 
@@ -222,8 +254,11 @@ class SQLAPI {
         }
     }
     
+    /**
+     * Load users into memory
+     */
     private void loadUsersIntoMemory() {
-        ResultSet rs = runSQLCommand("select * from user;");
+        ResultSet rs = runSQLQueryCommand("select * from user;");
         users = FXCollections.observableArrayList();
 
 
@@ -241,8 +276,15 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Checks if username and password are valid
+     * 
+     * @param username username to check
+     * @param password password to check
+     * @return is username and password valid
+     */
     public boolean isUsernamePasswordValid(String username, String password) {
-        ResultSet rs = runSQLCommand("select * from user where " +
+        ResultSet rs = runSQLQueryCommand("select * from user where " +
                        "lower(username) = \"" + username.toLowerCase() + "\";");
 
         try {
@@ -258,12 +300,23 @@ class SQLAPI {
         return false;
     }
     
+    /**
+     * Returns list of users
+     * 
+     * @return list of users
+     */
     public ObservableList<ORMUser> getUsers() {
         return users;
     }
     
+    /**
+     * Return user by username
+     * 
+     * @param username username to get user of
+     * @return user object of username
+     */
     public ORMUser getUserByName(String username) {
-        ResultSet rs = runSQLCommand("select * from user where " +
+        ResultSet rs = runSQLQueryCommand("select * from user where " +
                        "lower(userName) = \"" + username.toLowerCase() + "\";");
 
         try {
@@ -277,6 +330,13 @@ class SQLAPI {
         return null;
     }
 
+    /**
+     * Return appointments in week of year
+     * 
+     * @param weekOfYear week of year of appointment to return
+     * @param year year of appointments
+     * @return appointment in week of year
+     */
     public ObservableList<ORMAppointment> getAppointmentsInWeek(int weekOfYear, int year) {
         SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(year, weekOfYear);
 
@@ -286,6 +346,13 @@ class SQLAPI {
         return FXCollections.observableArrayList();
     }
 
+    /**
+     * Return appointments in month
+     * 
+     * @param monthOfYear month of appointments to return
+     * @param year year of appointments to return
+     * @return appointment in month
+     */
     public ObservableList<ORMAppointment> getAppointmentsByMonth(int monthOfYear, int year) {
         ObservableList<ORMAppointment> appointmentsInMonth = FXCollections.observableArrayList();
 
@@ -305,6 +372,12 @@ class SQLAPI {
         return appointmentsInMonth;
     }
 
+    /**
+     * Return cities in country
+     * 
+     * @param countryId country to get cities of
+     * @return cities in country
+     */
     public ObservableList<ORMCity> getCountryCities(int countryId) {
         ObservableList<ORMCity> countryCities = FXCollections.observableArrayList();
 
@@ -317,18 +390,44 @@ class SQLAPI {
         return countryCities;
     }
 
+    /**
+     * Return countries
+     * 
+     * @return countries
+     */
     public ObservableList<ORMCountry> getCountries() {
         return FXCollections.observableArrayList(countries.values());
     }
 
+    /**
+     * Return addresses
+     * 
+     * @return addresses
+     */
     public ObservableList<ORMAddress> getAddresses() {
         return FXCollections.observableArrayList(addresses.values());
     }
 
+    /** 
+     * Return customers
+     * 
+     * @return customers
+     */
     public ObservableList<ORMCustomer> getCustomers() {
         return FXCollections.observableArrayList(customers.values());
     }
 
+    /**
+     * Insert address into database
+     * 
+     * @param address1
+     * @param address2
+     * @param postalCode
+     * @param phone
+     * @param city
+     * @param user
+     * @return inserted address
+     */
     public ORMAddress insertAddress(String address1, String address2,
             String postalCode, String phone, ORMCity city, String user) {
         int maxId = Collections.max(addresses.keySet());
@@ -373,6 +472,15 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Insert customer into database
+     * 
+     * @param customerName
+     * @param active
+     * @param address
+     * @param user
+     * @return insert customer into database
+     */
     public ORMCustomer insertCustomer(String customerName, boolean active,
             ORMAddress address, String user) {
         int maxId = Collections.max(customers.keySet());
@@ -415,6 +523,17 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Update address in database
+     * 
+     * @param address1
+     * @param address2
+     * @param postalCode
+     * @param phone
+     * @param address
+     * @param city
+     * @param user 
+     */
     public void updateAddress(String address1, String address2,
             String postalCode, String phone, ORMAddress address, ORMCity city, String user) {
         try {
@@ -438,6 +557,15 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Update customer in database
+     * 
+     * @param customerName
+     * @param active
+     * @param address
+     * @param customer
+     * @param user 
+     */
     public void updateCustomer(String customerName, boolean active,
             ORMAddress address, ORMCustomer customer, String user) {
         try {
@@ -457,7 +585,23 @@ class SQLAPI {
             System.out.println("SQL update error: " + ex.getMessage());
         }
     }
-
+    
+/**
+ * Update appointment in database
+ * 
+ * @param appointment
+ * @param customer
+ * @param user
+ * @param title
+ * @param type
+ * @param description
+ * @param location
+ * @param contact
+ * @param url
+ * @param start
+ * @param end
+ * @param updateUser 
+ */
     public void updateAppointment(ORMAppointment appointment,
             ORMCustomer customer, ORMUser user, String title, String type, String description,
             String location, String contact, String url, LocalDateTime start,
@@ -495,6 +639,11 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Returns the consultant schedule report
+     * 
+     * @return the consultant schedule report
+     */
     public String consultantScheduleReport() {
         String retVal = "";
        
@@ -529,6 +678,11 @@ class SQLAPI {
         return retVal;
     }
 
+    /**
+     * Return appointment type by month report
+     * 
+     * @return appointment type by month report
+     */
     public String appointmentTypesByMonthReport() {
         String retVal = "";
        
@@ -571,6 +725,11 @@ class SQLAPI {
         return retVal;
     }
 
+    /**
+     * Return number of appointments by customer report
+     * 
+     * @return number of appointments by customer report
+     */
     public String numberOfAppointmentsByCustomer() {
         String retVal = "";
        
@@ -600,6 +759,22 @@ class SQLAPI {
         return retVal;
     }
     
+    /**
+     * Insert appointment into database
+     * 
+     * @param customer
+     * @param user
+     * @param title
+     * @param type
+     * @param description
+     * @param location
+     * @param contact
+     * @param url
+     * @param start
+     * @param end
+     * @param updateUser
+     * @return inserted appointment
+     */
     public ORMAppointment insertAppointment(ORMCustomer customer, ORMUser user,
             String title,
         String type, String description, String location, String contact,
@@ -669,22 +844,52 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Return country by id
+     * 
+     * @param countryId id of country to return
+     * @return country of country id
+     */
     public ORMCountry getCountryById(int countryId) {
         return countries.get(countryId);
     }
 
+    /**
+     * Return city by id
+     * 
+     * @param cityId id of city to return
+     * @return city of city id
+     */
     public ORMCity getCityById(int cityId) {
         return cities.get(cityId);
     }
 
+    /**
+     * Return customer by id
+     * 
+     * @param customerId id of customer to return
+     * @return customer of customer id
+     */
     public ORMCustomer getCustomerById(int customerId) {
         return customers.get(customerId);
     }
 
+    /**
+     * Return address by id
+     * 
+     * @param addressId id of address to return
+     * @return address of address id
+     */
     public ORMAddress getAddressById(int addressId) {
         return addresses.get(addressId);
     }
     
+    /**
+     * Return user by id
+     * 
+     * @param userId id of user to return
+     * @return user of user id
+     */
     public ORMUser getUserById(int userId) {
         for (ORMUser user : users) {
             if (user.getUserId() == userId) {
@@ -694,6 +899,11 @@ class SQLAPI {
         return null;
     }
 
+    /**
+     * Delete customer from database
+     * 
+     * @param selectedCustomer customer to delete
+     */
     public void deleteCustomer(ORMCustomer selectedCustomer) {
         customers.remove(selectedCustomer.getCustomerId());
         try {
@@ -706,6 +916,13 @@ class SQLAPI {
         }
     }
 
+    /**
+     * Check if appointment overlaps
+     * 
+     * @param windowStart start of overlap check
+     * @param windowEnd end of overlap check
+     * @return does appointment exist
+     */
     public boolean doesAppointmentExistInWindow(LocalDateTime windowStart,
             LocalDateTime windowEnd) {
 
@@ -731,6 +948,12 @@ class SQLAPI {
         return false;
     }
 
+    /**
+     * Is there an appointment within 15min
+     * 
+     * @param nowInUTC current time
+     * @return is appointment in 15min
+     */
     public boolean isAppointmentWithin15Min(LocalDateTime nowInUTC) {
         SimpleImmutableEntry yearWeekEntry = new SimpleImmutableEntry(
             nowInUTC.getYear(),
@@ -748,6 +971,11 @@ class SQLAPI {
         return false;
     }
 
+    /**
+     * Delete appointment from db
+     * 
+     * @param appointment appointment to delete
+     */
     public void deleteAppointment(ORMAppointment appointment) {
         appointmentsById.remove(appointment.getAppointmentId());
 

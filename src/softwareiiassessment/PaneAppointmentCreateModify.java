@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +25,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-
+/**
+ * Pane to create and modify appointments
+ *
+ * @author Lesaun
+ */
 public class PaneAppointmentCreateModify extends GridPane {
 
     private final Text headerText = new Text("Appointment");
@@ -84,6 +87,7 @@ public class PaneAppointmentCreateModify extends GridPane {
         String[] hours = new String[]{"08am", "09am", "10am", "11am", "12pm",
                                       "01pm", "02pm", "03pm", "04pm", "05pm"};
 
+        // Prevent setting date to weekends
         startDate.setDayCellFactory(dayCel -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -93,12 +97,14 @@ public class PaneAppointmentCreateModify extends GridPane {
             }
         });
 
+        // Set the items for the hour and minute drop downs
         startHour.setItems(FXCollections.observableArrayList(hours));
         startMinute.setItems(FXCollections.observableArrayList(
                 Arrays.stream(IntStream.rangeClosed(0, 59).toArray())
                     .mapToObj(n -> String.format("%02d", n))
                         .collect(Collectors.toList())));
 
+        // Prevent end time from being less than start
         startHour.valueProperty().addListener((ov, t, ti) ->
             setEndLowTime(ti,
                 startMinute.getSelectionModel().getSelectedItem(),
@@ -106,7 +112,7 @@ public class PaneAppointmentCreateModify extends GridPane {
         startMinute.valueProperty().addListener((ov, t, ti) ->
             setEndLowTime(startHour.getSelectionModel().getSelectedItem(),
                 ti,
-                null));
+                null));        
         endHour.valueProperty().addListener((ov, t, ti) -> {
             if (ti != null)
                 setEndLowTime(startHour.getSelectionModel().getSelectedItem(),
@@ -114,6 +120,7 @@ public class PaneAppointmentCreateModify extends GridPane {
                     ti);
         });
 
+        // set user drop down options
         userDropDown.setItems(api.getUsers());
         userDropDown.setConverter(new StringConverter<ORMUser>() {
             @Override
@@ -178,7 +185,10 @@ public class PaneAppointmentCreateModify extends GridPane {
         add(saveBtn, 6, 21, 2, 1);
         add(cancelBtn, 8, 21, 2, 1);
     }
-
+    
+    /**
+     * Set the lowest allowed time for end time
+     */
     private void setEndLowTime(String start_hour, String start_minute,
                                String end_hour) {
         int ehour = 0;
@@ -221,98 +231,213 @@ public class PaneAppointmentCreateModify extends GridPane {
         }
     }
     
+    /**
+     * Set handler for select button
+     * 
+     * @param handler handler for select button
+     */
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selectBtn.setOnAction(handler);
     }
 
+    /**
+     * Set customer
+     * 
+     * @param customer customer to set
+     */
     public void setCustomer(ORMCustomer customer) {
         customerName.setText(customer.getCustomerName());
         this.customer = customer;
         customerSelected = true;
     }
 
+    /**
+     * Returns customer
+     * 
+     * @return customer
+     */
     public ORMCustomer getCustomer() {
         if (!customerSelected)
             return null;
         return customer;
     }
 
+    /**
+     * Sets error texts
+     * 
+     * @param errorText error text to set
+     */
     public void setErrorText(String errorText) {
         this.errorText.setText(errorText);
     }
 
+    /**
+     * Sets save button handler
+     *
+     * @param handler save button handler to set
+     */
     public void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
         this.saveBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets cancel button handler
+     * 
+     * @param handler cancel button handler
+     */
     public void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
 
+    /**
+     * Return appointment id
+     *
+     * @return appointment id
+     */
     public String getIdTextField() {
         return idTextField.getText();
     }
 
+    /**
+     * Sets appointment id
+     *
+     * @param id appointment id to set
+     */
     public void setIdTextField(String id) {
         this.idTextField.setText(id);
     }
 
+    /**
+     * Returns the title
+     *
+     * @return appointment title
+     */
     public String getTitle() {
         return title.getText();
     }
 
+    /**
+     * Sets the appointment title
+     *
+     * @param title appointment title to set
+     */
     public void setTitle(String title) {
         this.title.setText(title);
     }
 
+    /**
+     * Returns appointment type
+     *
+     * @return appointment type
+     */
     public String getType() {
         return type.getText();
     }
 
+    /**
+     * Sets appointment type
+     *
+     * @param type appointment type to set
+     */
     public void setType(String type) {
         this.type.setText(type);
     }
 
+    /**
+     * Returns the description
+     *
+     * @return description
+     */
     public String getDescription() {
         return description.getText();
     }
 
+    /**
+     * Sets the description
+     *
+     * @param description description to set
+     */
     public void setDescription(String description) {
         this.description.setText(description);
     }
 
+    /**
+     * Returns the location
+     *
+     * @return the location
+     */
     public String getLocation() {
         return location.getText();
     }
 
+    /**
+     * Sets the location
+     *
+     * @param location the location
+     */
     public void setLocation(String location) {
         this.location.setText(location);
     }
 
+    /**
+     * Returns the contact
+     *
+     * @return the contact
+     */
     public String getContact() {
         return contact.getText();
     }
 
+    /**
+     * Sets the contact
+     *
+     * @param contact contact to set
+     */
     public void setContact(String contact) {
         this.contact.setText(contact);
     }
 
+    /**
+     * Return the url
+     *
+     * @return url
+     */
     public String getUrl() {
         return url.getText();
     }
 
+    /**
+     * Sets the url
+     *
+     * @param url url to set
+     */
     public void setUrl(String url) {
         this.url.setText(url);
     }
     
+    /**
+     * Return the user
+     *
+     * @return user
+     */
     public ORMUser getUser() {
         return userDropDown.getSelectionModel().getSelectedItem();
     }
     
+    /**
+     * Sets the user
+     *
+     * @param user user to set
+     */
     public void setUser(ORMUser user) {
         this.userDropDown.setValue(user);
     }
 
+    /**
+     * Returns the start time
+     *
+     * @return start time
+     */
     public LocalDateTime getStart() {
         LocalDate startDateOnly = startDate.getValue();
         int shour;
@@ -329,6 +454,11 @@ public class PaneAppointmentCreateModify extends GridPane {
                .withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
     }
 
+    /**
+     * Set start time
+     *
+     * @param start start time to set
+     */
     public void setStart(LocalDateTime start) {
         LocalDateTime localStart = start.atZone(ZoneId.of("UTC"))
                  .withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
@@ -352,6 +482,11 @@ public class PaneAppointmentCreateModify extends GridPane {
         startMinute.setValue(String.format("%02d", localStart.getMinute()));
     }
 
+    /**
+     * Return the end time
+     *
+     * @return end time
+     */
     public LocalDateTime getEnd() {
          LocalDate startDateOnly = startDate.getValue();
         int ehour;
@@ -368,6 +503,11 @@ public class PaneAppointmentCreateModify extends GridPane {
                .withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
     }
 
+    /**
+     * Sets the end time
+     *
+     * @param end end time to set
+     */
     public void setEnd(LocalDateTime end) {
         LocalDateTime localEnd = end.atZone(ZoneId.of("UTC"))
                  .withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
@@ -389,10 +529,20 @@ public class PaneAppointmentCreateModify extends GridPane {
         endMinute.setValue(String.format("%02d", localEnd.getMinute()));
     }
 
+    /**
+     * Return if customer is selected
+     *
+     * @return if customer is selected
+     */
     public boolean isCustomerSelected() {
         return customerSelected;
     }
 
+    /**
+     * Set if customer selected
+     *
+     * @param customerSelected is customer selected
+     */
     public void setCustomerSelected(boolean customerSelected) {
         this.customerSelected = customerSelected;
     }

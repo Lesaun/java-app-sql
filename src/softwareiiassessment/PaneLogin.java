@@ -13,7 +13,11 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-
+/**
+ * Login pane
+ *
+ * @author Lesaun
+ */
 public class PaneLogin extends GridPane {
 
     private final Text headerText = new Text("Login");
@@ -49,11 +53,15 @@ public class PaneLogin extends GridPane {
         add(usernameField, 4, 2, 3, 1);
         add(passwordPrompt, 2, 3, 1, 1);
         add(passwordField, 4, 3, 3, 1);
-        add(failedLoginText, 2, 4, 4, 1);
         add(loginBtn, 6, 5, 2, 1);
         add(exitBtn, 8, 5, 2, 1);
     }
 
+    /**
+     * Set locale
+     *
+     * @param locale
+     */
     public void setLocale(Locale locale) {
         if (locale.equals(Locale.FRANCE) || locale.equals(Locale.FRENCH)) {
             headerText.setText("Connexion");
@@ -75,18 +83,45 @@ public class PaneLogin extends GridPane {
         }
     }
 
+    /**
+     * Set login button handler
+     *
+     * @param handler set login button handler
+     */
     public final void setLoginBtnEvent(EventHandler<ActionEvent> handler) {
         loginBtn.setOnAction(handler);
     }
 
+    /**
+     * Shows error message
+     */
+    public void showErrorMessage() {
+        add(failedLoginText, 2, 4, 4, 1);
+    }
+
+    /**
+     * Set exit button handler
+     *
+     * @param handler exit button handler
+     */
     public final void setExitBtnEvent(EventHandler<ActionEvent> handler) {
         exitBtn.setOnAction(handler);
     }
 
+    /**
+     * Returns the username
+     *
+     * @return
+     */
     public String getUsername() {
         return usernameField.getText();
     }
 
+    /**
+     * Returns the password
+     *
+     * @return the password
+     */
     public String getPassword() {
         return passwordField.getText();
     }

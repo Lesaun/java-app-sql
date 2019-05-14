@@ -14,7 +14,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-
+/**
+ * Select address pane
+ *
+ * @author Lesaun
+ */
 public class PaneSelectAddress extends GridPane {
     private final Text headerText = new Text("Select Address");
     private final Button selBtn = new Button("Select");
@@ -52,6 +56,11 @@ public class PaneSelectAddress extends GridPane {
         this.add(selBtn, 17, 5, 3, 1);
     }
 
+    /**
+     * Construct the addresses table view
+     * 
+     * @param api 
+     */
     private void constructTableView(SQLAPI api) {
 
         TableColumn address1Col = new TableColumn("Address 1");
@@ -89,14 +98,29 @@ public class PaneSelectAddress extends GridPane {
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Sets the cancel button handler
+     *
+     * @param handler handler to set
+     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets select button handler
+     *
+     * @param handler select button handler
+     */
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selBtn.setOnAction(handler);
     }
 
+    /**
+     * Return the selected address
+     *
+     * @return the selected address
+     */
     public ORMAddress getSelectedAddress() {
         return tableView.getSelectionModel().getSelectedItem();
     }

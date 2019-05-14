@@ -11,7 +11,11 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-
+/**
+ * Pane to create and modify addresses
+ *
+ * @author Lesaun
+ */
 public class PaneAddressCreateModify extends GridPane {
 
     private final Text headerText = new Text("Address");
@@ -34,7 +38,7 @@ public class PaneAddressCreateModify extends GridPane {
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
 
-    public PaneAddressCreateModify(SQLAPI api) {
+    PaneAddressCreateModify(SQLAPI api) {
 
         // Add prompt text to text fields
         idField.setPromptText("Auto Gen - Disabled");
@@ -110,62 +114,137 @@ public class PaneAddressCreateModify extends GridPane {
         add(cancelBtn, 8, 9, 2, 1);
     }
 
+    /**
+     * Sets hander for save button
+     * 
+     * @param handler handler to set
+     */
     public final void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
         this.saveBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets hander for cancel button
+     * 
+     * @param handler handler to set
+     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
 
+    /**
+     * Return selected city
+     * 
+     * @return selected city
+     */
     public ORMCity getSelectedCity() {
         return cityDropDown.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * Sets city name
+     * 
+     * @param city city name to set
+     */
     public void setCity(ORMCity city) {
         this.cityDropDown.setValue(city);
     }
 
+    /**
+     * Returns selected country
+     *
+     * @return selected country
+     */
     public ORMCountry getSelectedCountry() {
         return countryDropDown.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * Sets country
+     * 
+     * @param country country to set
+     */
     public void setCountry(ORMCountry country) {
         this.countryDropDown.setValue(country);
     }
 
+    /**
+     * Sets address id
+     *
+     * @param id address id to set
+     */
     public void setIdTextField(String id) {
         idField.setText(id);
     }
 
+    /**
+     * Returns address line 1
+     *
+     * @return address line 1
+     */
     public String getAddress1TextField() {
         return address1Field.getText();
     }
 
+    /**
+     * Sets address line 1
+     *
+     * @param address1 address line 1 to set
+     */
     public void setAddress1TextField(String address1) {
         this.address1Field.setText(address1);
     }
 
+    /**
+     * Returns address line 2
+     *
+     * @return address line 2
+     */
     public String getAddress2TextField() {
         return address2Field.getText();
     }
 
+    /**
+     * Sets address line 2
+     * 
+     * @param address2 address line 2 to set
+     */
     public void setAddress2TextField(String address2) {
         this.address2Field.setText(address2);
     }
 
+    /**
+     * Return the postal code
+     *
+     * @return the postal code
+     */
     public String getPostalTextField() {
         return postalField.getText();
     }
 
+    /**
+     * Sets the postal code
+     *
+     * @param postalCode postal code to set
+     */
     public void setPostalTextField(String postalCode) {
         this.postalField.setText(postalCode);
     }
 
+    /**
+     * Returns the phone number
+     * 
+     * @return the phone number
+     */
     public String getPhoneTextField() {
         return phoneField.getText();
     }
 
+    /**
+     * Sets the phone number
+     *
+     * @param phone phone number to set
+     */
     public void setPhoneTextField(String phone) {
         this.phoneField.setText(phone);
     }

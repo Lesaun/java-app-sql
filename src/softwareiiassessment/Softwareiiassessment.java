@@ -6,13 +6,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.Locale;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-
+/**
+ * Appointment Manager entry point
+ *
+ * @author Lesaun
+ */
 public class Softwareiiassessment extends Application {
     private Stage primaryStage;
     private SQLAPI api;
@@ -43,6 +46,11 @@ public class Softwareiiassessment extends Application {
         showLoginPane();
     }
 
+    /**
+     * Change active scene
+     * 
+     * @param newScene scene to change to
+     */
     private void changeScene(Scene newScene) {
         primaryStage.hide();
         primaryStage.setScene(newScene);
@@ -50,6 +58,9 @@ public class Softwareiiassessment extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Show login point
+     */
     private void showLoginPane() {
         loginPane = new PaneLogin();
         loginScene = new Scene(loginPane, 480, 220);
@@ -82,6 +93,8 @@ public class Softwareiiassessment extends Application {
                 } else {
                     showCalendarPane();
                 }
+            } else {
+                loginPane.showErrorMessage();
             }
         });
 
@@ -89,10 +102,14 @@ public class Softwareiiassessment extends Application {
         changeScene(loginScene);
     }
 
+    /**
+     * Show calendar pane
+     */
     private void showCalendarPane() {
         calendarPane = new PaneCalendar(api, LocalDateTime.now());
         calendarScene = new Scene(calendarPane, 745, 382);
 
+        // justification of lambda: simplify's code for displaying panes
         calendarPane.setAddBtnEvent(event -> showAppointmentAddPane());
 
         calendarPane.setModBtnEvent(event -> showAppointmentEditPane());
@@ -112,6 +129,9 @@ public class Softwareiiassessment extends Application {
         changeScene(calendarScene);
     }
     
+    /**
+     * Show report pane
+     */
     private void showReportsPane() {
         reportPane = new PaneReport();
         reportScene = new Scene(reportPane, 280, 310);
@@ -158,6 +178,9 @@ public class Softwareiiassessment extends Application {
         changeScene(reportScene);        
     }
 
+    /**
+     * Show manager customer pane
+     */
     private void showManageCustomerPane() {
         customerManagerPane = new PaneCustomerManager(api);
         customerManagerScene = new Scene(customerManagerPane, 580, 260);
@@ -176,6 +199,9 @@ public class Softwareiiassessment extends Application {
         changeScene(customerManagerScene);
     }
 
+    /**
+     * Show appointment add pane
+     */
     private void showAppointmentAddPane() {
         appointmentPane = new PaneAppointmentCreateModify(api);
         appointmentScene = new Scene(appointmentPane, 480, 660);
@@ -214,6 +240,9 @@ public class Softwareiiassessment extends Application {
         changeScene(appointmentScene);
     }
 
+    /**
+     * Show appointment edit pane
+     */
     private void showAppointmentEditPane() {
         appointmentPane = new PaneAppointmentCreateModify(api);
         appointmentScene = new Scene(appointmentPane, 480, 660);
@@ -269,6 +298,9 @@ public class Softwareiiassessment extends Application {
         changeScene(appointmentScene);
     }
 
+    /**
+     * Show customer select pane
+     */
     private void showCustomerSelectPane() {
         PaneSelectCustomer customerSelectPane = new PaneSelectCustomer(api);
         Scene customerSelectScene = new Scene(customerSelectPane, 580, 260);
@@ -286,6 +318,9 @@ public class Softwareiiassessment extends Application {
         changeScene(customerSelectScene);
     }
 
+    /**
+     * Show customer add pane
+     */
     private void showCustomerAddPane() {
         customerPane = new PaneCustomerCreateModify();
         customerScene = new Scene(customerPane, 480, 430);
@@ -313,6 +348,9 @@ public class Softwareiiassessment extends Application {
         changeScene(customerScene);
     }
 
+    /**
+     * Show customer edit pane
+     */
     private void showCustomerEditPane() {
         customerPane = new PaneCustomerCreateModify();
         customerScene = new Scene(customerPane, 480, 430);
@@ -348,6 +386,9 @@ public class Softwareiiassessment extends Application {
         changeScene(customerScene);
     }
 
+    /**
+     * Show address edit pane
+     */
     private void showAddressEditPane() {
         addressPane = new PaneAddressCreateModify(api);
         addressScene = new Scene(addressPane, 480, 480);
@@ -385,6 +426,9 @@ public class Softwareiiassessment extends Application {
         changeScene(addressScene);
     }
 
+    /**
+     * Show address select pane
+     */
     private void showAddressSelectPane() {
         PaneSelectAddress addressSelectPane = new PaneSelectAddress(api);
         Scene addressSelectScene = new Scene(addressSelectPane, 580, 260);
@@ -405,6 +449,9 @@ public class Softwareiiassessment extends Application {
         changeScene(addressSelectScene);
     }
 
+    /**
+     * Show address add pane
+     */
     private void showAddressAddPane() {
         addressPane = new PaneAddressCreateModify(api);
         addressScene = new Scene(addressPane, 480, 480);
@@ -430,6 +477,11 @@ public class Softwareiiassessment extends Application {
         changeScene(addressScene);
     }
 
+    /**
+     * Entry point - launch JavaFX application
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         launch(args);
     }

@@ -1,8 +1,6 @@
 package softwareiiassessment;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -14,7 +12,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-
+/**
+ * Pane to create and modify customers
+ * 
+ * @author Lesaun
+ */
 public class PaneCustomerCreateModify extends GridPane {
     private final RadioButton activeRadio = new RadioButton("Active");
     private final RadioButton disabledRadio = new RadioButton("Disabled");
@@ -42,8 +44,8 @@ public class PaneCustomerCreateModify extends GridPane {
     private final Button saveBtn = new Button("Save");
     private final Button cancelBtn = new Button("Cancel");
 
-
-    public PaneCustomerCreateModify() {
+    
+    PaneCustomerCreateModify() {
         // Setup toggle group
         activeRadio.setId("active");
         disabledRadio.setId("disabled");
@@ -101,6 +103,13 @@ public class PaneCustomerCreateModify extends GridPane {
         add(cancelBtn, 8, 10, 2, 1);
     }
 
+    /**
+     * Sets address of customer
+     *
+     * @param address address of customer
+     * @param city city of customer
+     * @param country country of customer
+     */
     public void setAddress(ORMAddress address, ORMCity city, ORMCountry country) {
         this.address = address;
         this.address1.setText(address.getAddress());
@@ -110,54 +119,101 @@ public class PaneCustomerCreateModify extends GridPane {
         this.phone.setText(address.getPhone());
     }
 
+    /**
+     * Returns the address of customer
+     *
+     * @return the address of customer
+     */
     public ORMAddress getAddress() {
         return address;
     }
 
-    public boolean hasValidCustomer() {
-        return true;
-    }
-
-    public void displayErrors() {
-
-    }
-
+    /**
+     * Sets the save button event handler
+     * 
+     * @param handler save button event handler
+     */
     public final void setSaveBtnEvent(EventHandler<ActionEvent> handler) {
         this.saveBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the cancel button handler
+     *
+     * @param handler cancel button handler to set
+     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.cancelBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the address add handler
+     *
+     * @param handler sets the address add handler
+     */
     public final void setAddressAddEvent(EventHandler<ActionEvent> handler) {
         this.addressAdd.setOnAction(handler);
     }
 
+    /**
+     * Sets the address edit button handler
+     *
+     * @param handler address edit button handler to set
+     */
     public final void setAddressEditEvent(EventHandler<ActionEvent> handler) {
         this.addressEdit.setOnAction(handler);
     }
 
+    /**
+     * Sets the address select button handler
+     *
+     * @param handler address select button handler
+     */
     public final void setAddressSelectEvent(EventHandler<ActionEvent> handler) {
         this.addressSelect.setOnAction(handler);
     }
 
+    /**
+     * Sets the customer id
+     *
+     * @param id customer id to set
+     */
     public void setIdTextField(String id) {
         idTextField.setText(id);
     }
 
+    /**
+     * Return the customer name
+     *
+     * @return the customer name
+     */
     public String getNameTextField() {
         return nameTextField.getText();
     }
 
+    /**
+     * Sets the customer name
+     *
+     * @param name the customer name to set
+     */
     public void setNameTextField(String name) {
         nameTextField.setText(name);
     }
 
+    /**
+     * Return if customer is active
+     *
+     * @return if customer is active
+     */
     public boolean isActive() {
         return active;
     }
 
+    /**
+     * Set customer active or disabled
+     *
+     * @param active customer active boolean
+     */
     public void setActive(boolean active) {
         if (active) {
             activeRadio.setSelected(true);

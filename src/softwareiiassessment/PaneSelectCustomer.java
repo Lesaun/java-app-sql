@@ -15,7 +15,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
 /**
- * A Pane with TableView and controls
+ * Select customer pane
  *
  * @author lesaun
  */
@@ -56,6 +56,11 @@ public class PaneSelectCustomer extends GridPane {
         this.add(selBtn, 17, 5, 3, 1);
     }
 
+    /**
+     * Construct customer table view
+     * 
+     * @param api 
+     */
     private void constructTableView(SQLAPI api) {
        this.tableView = new TableView<>();
 
@@ -85,14 +90,29 @@ public class PaneSelectCustomer extends GridPane {
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Set cancel button handler
+     * 
+     * @param handler cancel button handler
+     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
 
+    /**
+     * Set select button handler
+     *
+     * @param handler select button handler
+     */
     public final void setSelectBtnEvent(EventHandler<ActionEvent> handler) {
         this.selBtn.setOnAction(handler);
     }
 
+    /**
+     * Return selected customer
+     *
+     * @return selected customer
+     */
     public ORMCustomer getSelectedCustomer() {
         return tableView.getSelectionModel().getSelectedItem();
     }

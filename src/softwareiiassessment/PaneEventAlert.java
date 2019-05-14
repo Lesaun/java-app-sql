@@ -8,8 +8,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-
-
+/**
+ * Alert pane
+ * 
+ * @author Lesaun
+ */
 public class PaneEventAlert extends GridPane {
     private final Text eventAlertText = new Text("There is an Appointment within 15 minutes");
     private final Button okBtn = new Button("Ok");
@@ -31,6 +34,11 @@ public class PaneEventAlert extends GridPane {
         add(okBtn, 8, 2, 2, 1);
     }
 
+    /**
+     * Set ok button handler
+     *
+     * @param handler ok button handler to set
+     */
     public final void setOkBtnEvent(EventHandler<ActionEvent> handler) {
         okBtn.setOnAction(handler);
     }

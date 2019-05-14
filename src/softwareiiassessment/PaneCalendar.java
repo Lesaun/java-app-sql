@@ -27,7 +27,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-
+/**
+ * Pane to view calendar
+ *
+ * @author Lesaun
+ */
 public class PaneCalendar extends GridPane {
     private TemporalField woy =
         WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear();
@@ -72,6 +76,8 @@ public class PaneCalendar extends GridPane {
         logBtn.setPrefWidth(71);
 
         constructTableView();
+        
+        // Display the current date range
         currentDate = startDate;
         calLocation = new Text(
                 currentDate.with(DayOfWeek.MONDAY).toLocalDate().toString() +
@@ -79,6 +85,7 @@ public class PaneCalendar extends GridPane {
                 currentDate.with(DayOfWeek.FRIDAY).toLocalDate().toString());
         setTableViewToWeekOfYear(currentDate.get(woy), currentDate.getYear());
 
+        // handle prev button
         calPrev.setOnAction(e -> {
             if (weekRadio.isSelected()) {
                 currentDate = currentDate.minusDays(7);
@@ -95,7 +102,8 @@ public class PaneCalendar extends GridPane {
                         .getDisplayName(TextStyle.FULL, Locale.ENGLISH));
             }
         });
-
+        
+        // handle next button
         calNext.setOnAction(e -> {
             if (weekRadio.isSelected()) {
                 currentDate = currentDate.plusDays(7);
@@ -113,6 +121,8 @@ public class PaneCalendar extends GridPane {
             }
         });
 
+        // handle month / week toggle
+        // justification for lamda: simplifies code for toggle
         radioGroup.selectedToggleProperty().addListener((ov, ot, newToggle) -> {
             RadioButton selectedBtn = (RadioButton) newToggle;
             if (selectedBtn.getId().equals("week")) {
@@ -160,6 +170,9 @@ public class PaneCalendar extends GridPane {
         add(logBtn, 23, 7, 3, 1);
     }
 
+    /**
+     * Construct calendar table view
+     */
     private void constructTableView() {
         this.tableView = new TableView<>();
 
@@ -192,20 +205,38 @@ public class PaneCalendar extends GridPane {
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Set table view items
+     */
     private void setTableItems(ObservableList<ORMAppointment> items) {
         this.tableView.getItems().clear();
         this.tableView.setItems(items);
         this.tableView.refresh();
     }
 
+    /**
+     * Set table view to show appointments week and year
+     * 
+     * @param week week of year to set calendar to
+     * @param year year to set calendar to
+     */
     private void setTableViewToWeekOfYear(int week, int year) {
         setTableItems(api.getAppointmentsInWeek(week, year));
     }
 
+    /**
+     * Set table view to show appointments in month and year
+     * 
+     * @param month month of year to set calendar to
+     * @param year year to set calendar to
+     */
     private void setTableViewToMonthOfYear(int month, int year) {
         setTableItems(api.getAppointmentsByMonth(month, year));
     }
 
+    /**
+     * Refresh calendar items
+     */
     public void refreshCalendar() {
         if (weekRadio.isSelected()) {
             setTableViewToWeekOfYear(currentDate.get(woy),
@@ -216,30 +247,65 @@ public class PaneCalendar extends GridPane {
         }
     }
 
+    /**
+     * Return the selected appointment
+     * 
+     * @return select appointment
+     */
     public ORMAppointment getSelectedAppointment() {
         return tableView.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * Sets the add button handler
+     *
+     * @param handler add button handler to set
+     */
     public final void setAddBtnEvent(EventHandler<ActionEvent> handler) {
         this.addBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the modify button handler to set
+     *
+     * @param handler modify button handler to set
+     */
     public final void setModBtnEvent(EventHandler<ActionEvent> handler) {
         this.modBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the delete button handler
+     *
+     * @param handler delete button handler to set
+     */
     public final void setDelBtnEvent(EventHandler<ActionEvent> handler) {
         this.delBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the logout button handler
+     *
+     * @param handler logout button handler to set
+     */
     public final void setLogoutBtnEvent(EventHandler<ActionEvent> handler) {
         this.logBtn.setOnAction(handler);
     }
     
+    /**
+     * Sets the reports button handler
+     *
+     * @param handler
+     */
     public final void setReportsBtnEvent(EventHandler<ActionEvent> handler) {
         this.reportsBtn.setOnAction(handler);
     }
 
+    /**
+     * Sets the customer manager button handler event
+     *
+     * @param handler customer manager button handler event
+     */
     public final void setCustomerManagerBtnEvent(EventHandler<ActionEvent> handler) {
         this.manageCustomersBtn.setOnAction(handler);
     }

@@ -16,7 +16,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
 /**
- * A Pane with TableView and controls
+ * A Pane to manage customer
  *
  * @author lesaun
  */
@@ -63,6 +63,11 @@ public class PaneCustomerManager extends GridPane {
         add(canBtn, 17, 5, 3, 1);
     }
 
+    /**
+     * Construct customer table view
+     * 
+     * @param api
+     */
     private void constructTableView(SQLAPI api) {
         this.tableView = new TableView<>();
 
@@ -92,27 +97,57 @@ public class PaneCustomerManager extends GridPane {
         this.tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Set add button handler
+     *
+     * @param handler add button handler to set
+     */
     public final void setAddBtnEvent(EventHandler<ActionEvent> handler) {
         this.addBtn.setOnAction(handler);
     }
 
+    /**
+     * Set mod button handler
+     *
+     * @param handler mod button handler to set
+     */
     public final void setModBtnEvent(EventHandler<ActionEvent> handler) {
         this.modBtn.setOnAction(handler);
     }
 
+    /**
+     * Set delete customer button handler
+     *
+     * @param handler delete customer button handler
+     */
     public final void setDelBtnEvent(EventHandler<ActionEvent> handler) {
         this.delBtn.setOnAction(handler);
     }
 
+    /**
+     * Set cancel button handler
+     *
+     * @param handler cancel button handler
+     */
     public final void setCancelBtnEvent(EventHandler<ActionEvent> handler) {
         this.canBtn.setOnAction(handler);
     }
 
+    /**
+     * Set customers on table view
+     *
+     * @param customers customer to set on table view
+     */
     public void updateCustomers(ObservableList<ORMCustomer> customers) {
         tableView.getItems().clear();
         tableView.setItems(customers);
     }
 
+    /**
+     * Return current customer selection
+     *
+     * @return current customer selection
+     */
     public ORMCustomer getSelectedCustomer() {
         return tableView.getSelectionModel().getSelectedItem();
     }
