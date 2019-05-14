@@ -7,7 +7,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -491,7 +494,41 @@ class SQLAPI {
             System.out.println("SQL INSERT ERROR: " + ex.getMessage());
         }
     }
-    
+
+    public String consultantScheduleReport() {
+        String retVal = "";
+       
+        try {   
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select * from appointment ORDER BY userId, start ASC");
+            int lastUser = -1;
+            
+            while (rs.next()) {
+                int userId =  rs.getInt("userId");
+                
+                if (lastUser != userId) {
+                    retVal += "\n\nConsultant " + (
+                            (userId == 0) ? "Unassigned" :
+                            this.getUserById(userId).getUserName()) + ": \n";
+                    lastUser = userId;
+                }
+                
+                ZonedDateTime utcTime = rs.getTimestamp("start")
+                        .toLocalDateTime().atZone(ZoneId.of("UTC"));
+                ZonedDateTime localTime = utcTime.withZoneSameInstant(
+                        ZoneId.systemDefault());
+                String formattedTime = localTime.format(
+                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+                
+                retVal += formattedTime + " : " + rs.getString("title") + "\n";
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return retVal;
+    }
+
     public String appointmentTypesByMonthReport() {
         String retVal = "";
        
@@ -539,32 +576,22 @@ class SQLAPI {
        
         try {        
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from appointment ORDER BY start ASC");            
-            HashMap<Integer, Integer> customersTypeCounts = new HashMap<>();
-            Month lastMonth = null;
+            ResultSet rs = stmt.executeQuery("select * from appointment;");            
+            HashMap<Integer, Integer> customerApptCounts = new HashMap<>();
             
-            while (rs.next()) {              
-                for (int customerId : customersTypeCounts.keySet()) {
-                    retVal += customerId + ": " +
-                            customersTypeCounts.get(customerId) + "\n";
-                }
-                retVal += "\n\n" + month.toString() + " " + Integer.toString(
-                    rs.getTimestamp("start").toLocalDateTime().getYear()) + "\n";
-                customersTypeCounts = new HashMap<>();
-                lastMonth = month;
-                
-
-                if (customersTypeCounts.containsKey(rs.getString("type"))) {
-                    customersTypeCounts.put(rs.getString("type"),
-                        customersTypeCounts.get(rs.getString("type")) + 1);
+            while (rs.next()) {                
+                if (customerApptCounts.containsKey(rs.getInt("customerId"))) {
+                    customerApptCounts.put(rs.getInt("customerId"),
+                        customerApptCounts.get(rs.getInt("customerId")) + 1);
                 } else {
-                    customersTypeCounts.put(rs.getString("type"), 1);
+                    customerApptCounts.put(rs.getInt("customerId"), 1);
                 }
             }
             
-            for (String type : customersTypeCounts.keySet()) {
-                retVal += (type == null ? "None" : type) + ": " +
-                        customersTypeCounts.get(type) + "\n";
+            for (int customerId : customerApptCounts.keySet()) {
+                retVal += Integer.toString(customerId) + " - " +
+                        this.getCustomerById(customerId).getCustomerName() +
+                        ": " + customerApptCounts.get(customerId) + "\n";
             }
         } catch (SQLException ex) {
             Logger.getLogger(SQLAPI.class.getName()).log(Level.SEVERE, null, ex);

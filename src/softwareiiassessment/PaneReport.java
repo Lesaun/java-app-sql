@@ -1,16 +1,11 @@
 package softwareiiassessment;
 
-import java.util.Locale;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-
-import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 
@@ -46,7 +41,7 @@ public class PaneReport extends GridPane {
         add(doneBtn, 1, 6, 2, 1);
     }
 
-    public final void setNumApptByMonBtnEvent(
+    public final void setNumApptByTypeMonBtnEvent(
         EventHandler<ActionEvent> handler) {
         numApptByMonBtn.setOnAction(handler);
     }

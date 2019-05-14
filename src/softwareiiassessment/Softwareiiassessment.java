@@ -1,5 +1,9 @@
 package softwareiiassessment;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -56,6 +60,20 @@ public class Softwareiiassessment extends Application {
 
             if (api.isUsernamePasswordValid(userName, loginPane.getPassword())) {
                 user = api.getUserByName(userName);
+                
+                try {
+                    String logPath = System.getProperty("user.home") +
+                        File.separator + "Documents" 
+                            + File.separator + "userlog.txt";
+                    FileWriter fw = new FileWriter(logPath, true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(userName + " logged in at " +
+                            Long.toString(System.currentTimeMillis()) + "\n");
+                    bw.close();
+                } catch (IOException ex) {
+                    System.out.println("failed to log login");
+                }
+                
                 if (api.isAppointmentWithin15Min(LocalDateTime.now(ZoneId.of("UTC")))) {
                     PaneEventAlert apptAlert = new PaneEventAlert();
                     Scene apptAlertScene = new Scene(apptAlert, 480, 120);
@@ -97,11 +115,43 @@ public class Softwareiiassessment extends Application {
     private void showReportsPane() {
         reportPane = new PaneReport();
         reportScene = new Scene(reportPane, 280, 310);
+        String docFolder = System.getProperty("user.home") +
+                File.separator + "Documents";
         
-        reportPane.setUserScheduleBtnEvent(e -> {});
-        reportPane.setNumApptByMonBtnEvent(e -> {});
+        reportPane.setUserScheduleBtnEvent(e -> {
+            try {
+                BufferedWriter writer = new BufferedWriter(
+                        new FileWriter(docFolder + File.separator
+                        + "consultant_schedule.txt"));
+                writer.write(api.consultantScheduleReport());
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println("failed to write user schedule report");
+            }
+        });
+
+        reportPane.setNumApptByTypeMonBtnEvent(e -> {
+            try {
+                BufferedWriter writer = new BufferedWriter(
+                        new FileWriter(docFolder + File.separator
+                        + "number_appts_by_type_month.txt"));
+                writer.write(api.appointmentTypesByMonthReport());
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println("failed to write num appts by type/month report");
+            }
+        });
+
         reportPane.setApptsByCustomerBtnEvent(e -> {
-            System.out.println(api.appointmentTypesByMonthReport());
+            try {
+                BufferedWriter writer = new BufferedWriter(
+                        new FileWriter(docFolder + File.separator
+                        + "number_of_appts_per_customer.txt"));
+                writer.write(api.numberOfAppointmentsByCustomer());
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println("failed to write number of appts by customer report");
+            }
         });
         reportPane.setDoneBtnEvent(e -> changeScene(calendarScene));
         
