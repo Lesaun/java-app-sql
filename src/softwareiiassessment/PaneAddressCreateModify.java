@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
@@ -107,11 +108,29 @@ public class PaneAddressCreateModify extends GridPane {
         add(cityPrompt, 2, 6, 3, 1);
         add(cityDropDown, 4, 6, 3, 1);
         add(postalPrompt, 2, 7, 1, 1);
-        add(postalField, 4, 7, 3, 1);
+        add(postalField, 3, 7, 2, 1);
         add(phonePrompt, 2, 8, 1, 1);
-        add(phoneField, 4, 8, 3, 1);
+        add(phoneField, 3, 8, 2, 1);
         add(saveBtn, 6, 9, 2, 1);
         add(cancelBtn, 8, 9, 2, 1);
+    }
+
+    /**
+     * Show postal error message
+     */
+    public void showPostalError() {
+        Text postalErrorText = new Text("must be 5 digits");
+        postalErrorText.setFill(Color.RED);
+        add(postalErrorText, 5, 7, 3, 1);
+    }
+
+    /**
+     * Show postal error message
+     */
+    public void showPhoneError() {
+        Text postalErrorText = new Text("format must be 9999999999 or 999-999-9999");
+        postalErrorText.setFill(Color.RED);
+        add(postalErrorText, 5, 8, 3, 1);
     }
 
     /**
@@ -232,12 +251,43 @@ public class PaneAddressCreateModify extends GridPane {
     }
 
     /**
+     * Checks if postal code is valid
+     *
+     * @return is postal code is valid
+     */
+    public boolean isValidPostalCode() {
+        boolean retVal = false;
+
+        if (postalField.getText().matches("\\d{5}")) {
+            retVal = true;
+        }
+
+        return retVal;
+    }
+
+
+    /**
      * Returns the phone number
      * 
      * @return the phone number
      */
     public String getPhoneTextField() {
         return phoneField.getText();
+    }
+
+    /**
+     * Check if valid phone number
+     *
+     * @return is phone valid
+     */
+    public boolean isValidPhone() {
+        boolean retVal = false;
+
+        if (phoneField.getText().matches("\\d{10}")) retVal = true;
+        if (phoneField.getText().matches("\\d{3}-\\d{3}-\\d{4}"))
+            retVal = true;
+
+        return retVal;
     }
 
     /**

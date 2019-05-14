@@ -139,6 +139,8 @@ public class Softwareiiassessment extends Application {
                 File.separator + "Documents";
         
         reportPane.setUserScheduleBtnEvent(e -> {
+
+            // Error handling type 2: try and catch, log on failure
             try {
                 BufferedWriter writer = new BufferedWriter(
                         new FileWriter(docFolder + File.separator
@@ -405,18 +407,30 @@ public class Softwareiiassessment extends Application {
         addressPane.setCity(currentCity);
 
         addressPane.setSaveBtnEvent(event -> {
-            api.updateAddress(addressPane.getAddress1TextField(),
-                addressPane.getAddress2TextField(),
-                addressPane.getPostalTextField(),
-                addressPane.getPhoneTextField(),
-                addressToEdit,
-                addressPane.getSelectedCity(),
-                user.getUserName());
 
-            ORMCity newCity = api.getCityById(addressToEdit.getCityId());
-            ORMCountry newCountry = api.getCountryById(newCity.getCountryId());
-            customerPane.setAddress(addressToEdit, newCity, newCountry);
-            changeScene(customerScene);
+            // Error handling type 1: limiting user input
+            if (addressPane.isValidPhone() && addressPane.isValidPostalCode()) {
+                api.updateAddress(addressPane.getAddress1TextField(),
+                    addressPane.getAddress2TextField(),
+                    addressPane.getPostalTextField(),
+                    addressPane.getPhoneTextField(),
+                    addressToEdit,
+                    addressPane.getSelectedCity(),
+                    user.getUserName());
+
+                ORMCity newCity = api.getCityById(addressToEdit.getCityId());
+                ORMCountry newCountry = api.getCountryById(newCity.getCountryId());
+                customerPane.setAddress(addressToEdit, newCity, newCountry);
+                changeScene(customerScene);
+            } else {
+                if (!addressPane.isValidPhone()) {
+                    addressPane.showPhoneError();
+                }
+
+                if (!addressPane.isValidPostalCode()) {
+                    addressPane.showPostalError();
+                }
+            }
         });
 
         addressPane.setCancelBtnEvent(event -> {
@@ -457,17 +471,27 @@ public class Softwareiiassessment extends Application {
         addressScene = new Scene(addressPane, 480, 480);
 
         addressPane.setSaveBtnEvent(event -> {
-            ORMAddress address = api.insertAddress(addressPane.getAddress1TextField(),
-                addressPane.getAddress2TextField(),
-                addressPane.getPostalTextField(),
-                addressPane.getPhoneTextField(),
-                addressPane.getSelectedCity(),
-                user.getUserName());
+            if (addressPane.isValidPhone() && addressPane.isValidPostalCode()) {
+                ORMAddress address = api.insertAddress(addressPane.getAddress1TextField(),
+                    addressPane.getAddress2TextField(),
+                    addressPane.getPostalTextField(),
+                    addressPane.getPhoneTextField(),
+                    addressPane.getSelectedCity(),
+                    user.getUserName());
 
-            ORMCity city = api.getCityById(address.getCityId());
-            ORMCountry country = api.getCountryById(city.getCountryId());
-            customerPane.setAddress(address, city, country);
-            changeScene(customerScene);
+                ORMCity city = api.getCityById(address.getCityId());
+                ORMCountry country = api.getCountryById(city.getCountryId());
+                customerPane.setAddress(address, city, country);
+                changeScene(customerScene);
+            } else {
+                if (!addressPane.isValidPhone()) {
+                    addressPane.showPhoneError();
+                }
+
+                if (!addressPane.isValidPostalCode()) {
+                    addressPane.showPostalError();
+                }
+            }
         });
 
         addressPane.setCancelBtnEvent(event -> {
